@@ -1,0 +1,115 @@
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import socket from "../socketConnection";
+
+export default function CreateRoom() {
+  console.log("CreateRoom invoked")
+  const location = useLocation();
+  const navigate = useNavigate();
+  const username = location.state?.username;
+
+  const [roomCode, setRoomCode] = useState(null);
+  const [players, setPlayers] = useState([]);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!username) {
+      navigate("/");
+      return;
+    }
+
+    if (!socket.connected) {
+      socket.connect();
+    }
+
+    socket.emit("room:create", { username });
+
+    const onRoomCreated = (data) => {
+      console.log(`ROOM CREATE : ${data.roomCode}`)
+      setRoomCode(data.roomCode);
+      setPlayers([username]);
+    };
+
+    const onPlayerJoined = (data) => {
+      setPlayers(data.players);
+    };
+
+    const onError = (data) => {
+      setError(data.message);
+    };
+
+    const onGameStarted = (data) => {
+      console.log("STARTING THE GAME")
+      navigate("/game", { state: { username: data.username, roomCode: data.roomCode, currentQuestion: data.currentQuestion } });
+    };
+
+    socket.on("room:created", onRoomCreated);
+    socket.on("room:player_joined", onPlayerJoined);
+    socket.on("game:started", (data) => onGameStarted(data));
+    socket.on("error", onError);
+
+    return () => {
+      socket.off("room:created", onRoomCreated);
+      socket.off("room:player_joined", onPlayerJoined);
+      socket.off("game:started", onGameStarted);
+      socket.off("error", onError);
+    };
+  }, [username, navigate]);
+
+  const handleStartGame = () => {
+    console.log(`USERNAME : ${username} || ROOM CODE : ${roomCode}`)
+    socket.emit("game:start", { username, roomCode });
+  };
+
+  if (!username) return null;
+
+  return (
+    <div className="page">
+      <div className="card glass">
+        <h1 className="title">Waiting Room</h1>
+
+        {error && <p className="error-msg">{error}</p>}
+
+        {roomCode ? (
+          <>
+            <p className="subtitle">Share this code with your friends</p>
+            <div className="room-code-display">{roomCode}</div>
+
+            <div className="players-section">
+              <h3 className="players-title">
+                Players ({players.length}/4)
+              </h3>
+              <ul className="player-list">
+                {players.map((p, i) => (
+                  <li key={i} className="player-item">
+                    <span className="player-avatar">
+                      {p.charAt(0).toUpperCase()}
+                    </span>
+                    <span className="player-name">{p}</span>
+                    {i === 0 && <span className="host-badge">HOST</span>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <button
+              className="btn btn-start"
+              onClick={handleStartGame}
+              disabled={players.length < 2}
+            >
+              🚀 Start Game
+            </button>
+            {players.length < 2 && (
+              <p className="hint-text">Need at least 2 players to start</p>
+            )}
+          </>
+        ) : (
+          <div className="loader-container">
+            <div className="loader"></div>
+            <p className="subtitle">Creating room…</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

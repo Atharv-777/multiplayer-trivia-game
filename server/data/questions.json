@@ -1,0 +1,1902 @@
+[
+  {
+    "question": "What planet is known as the Red Planet?",
+    "options": [
+      "Venus",
+      "Mars",
+      "Jupiter"
+    ],
+    "answer": "Mars",
+    "category": "Science"
+  },
+  {
+    "question": "What is the chemical symbol for gold?",
+    "options": [
+      "Go",
+      "Au",
+      "Gd"
+    ],
+    "answer": "Au",
+    "category": "Science"
+  },
+  {
+    "question": "How many bones are in the adult human body?",
+    "options": [
+      "206",
+      "186",
+      "226"
+    ],
+    "answer": "206",
+    "category": "Science"
+  },
+  {
+    "question": "What gas do plants absorb from the atmosphere?",
+    "options": [
+      "Oxygen",
+      "Carbon Dioxide",
+      "Nitrogen"
+    ],
+    "answer": "Carbon Dioxide",
+    "category": "Science"
+  },
+  {
+    "question": "What is the hardest natural substance on Earth?",
+    "options": [
+      "Quartz",
+      "Diamond",
+      "Topaz"
+    ],
+    "answer": "Diamond",
+    "category": "Science"
+  },
+  {
+    "question": "What is the speed of light in km/s (approximately)?",
+    "options": [
+      "300,000",
+      "150,000",
+      "500,000"
+    ],
+    "answer": "300,000",
+    "category": "Science"
+  },
+  {
+    "question": "Which organ in the human body produces insulin?",
+    "options": [
+      "Liver",
+      "Pancreas",
+      "Kidney"
+    ],
+    "answer": "Pancreas",
+    "category": "Science"
+  },
+  {
+    "question": "What is the most abundant gas in Earth's atmosphere?",
+    "options": [
+      "Oxygen",
+      "Nitrogen",
+      "Carbon Dioxide"
+    ],
+    "answer": "Nitrogen",
+    "category": "Science"
+  },
+  {
+    "question": "What is the chemical formula for water?",
+    "options": [
+      "H2O",
+      "CO2",
+      "NaCl"
+    ],
+    "answer": "H2O",
+    "category": "Science"
+  },
+  {
+    "question": "How many chromosomes do humans have?",
+    "options": [
+      "23",
+      "46",
+      "48"
+    ],
+    "answer": "46",
+    "category": "Science"
+  },
+  {
+    "question": "What type of animal is a dolphin?",
+    "options": [
+      "Fish",
+      "Mammal",
+      "Reptile"
+    ],
+    "answer": "Mammal",
+    "category": "Science"
+  },
+  {
+    "question": "What planet has the most moons?",
+    "options": [
+      "Jupiter",
+      "Saturn",
+      "Neptune"
+    ],
+    "answer": "Saturn",
+    "category": "Science"
+  },
+  {
+    "question": "What is the powerhouse of the cell?",
+    "options": [
+      "Nucleus",
+      "Mitochondria",
+      "Ribosome"
+    ],
+    "answer": "Mitochondria",
+    "category": "Science"
+  },
+  {
+    "question": "What metal is liquid at room temperature?",
+    "options": [
+      "Lead",
+      "Mercury",
+      "Tin"
+    ],
+    "answer": "Mercury",
+    "category": "Science"
+  },
+  {
+    "question": "Which blood type is the universal donor?",
+    "options": [
+      "A",
+      "O negative",
+      "AB"
+    ],
+    "answer": "O negative",
+    "category": "Science"
+  },
+  {
+    "question": "What is the largest organ in the human body?",
+    "options": [
+      "Heart",
+      "Liver",
+      "Skin"
+    ],
+    "answer": "Skin",
+    "category": "Science"
+  },
+  {
+    "question": "What does DNA stand for?",
+    "options": [
+      "Deoxyribonucleic Acid",
+      "Dinitrogen Acid",
+      "Dioxyribose Acid"
+    ],
+    "answer": "Deoxyribonucleic Acid",
+    "category": "Science"
+  },
+  {
+    "question": "What is the smallest planet in our solar system?",
+    "options": [
+      "Mars",
+      "Mercury",
+      "Pluto"
+    ],
+    "answer": "Mercury",
+    "category": "Science"
+  },
+  {
+    "question": "What element does 'O' represent on the periodic table?",
+    "options": [
+      "Osmium",
+      "Oxygen",
+      "Oganesson"
+    ],
+    "answer": "Oxygen",
+    "category": "Science"
+  },
+  {
+    "question": "How many teeth does an adult human typically have?",
+    "options": [
+      "28",
+      "32",
+      "36"
+    ],
+    "answer": "32",
+    "category": "Science"
+  },
+  {
+    "question": "Who painted the Mona Lisa?",
+    "options": [
+      "Michelangelo",
+      "Leonardo da Vinci",
+      "Raphael"
+    ],
+    "answer": "Leonardo da Vinci",
+    "category": "History"
+  },
+  {
+    "question": "In which year did World War II end?",
+    "options": [
+      "1943",
+      "1945",
+      "1947"
+    ],
+    "answer": "1945",
+    "category": "History"
+  },
+  {
+    "question": "Who was the first President of the United States?",
+    "options": [
+      "Thomas Jefferson",
+      "George Washington",
+      "John Adams"
+    ],
+    "answer": "George Washington",
+    "category": "History"
+  },
+  {
+    "question": "What ancient wonder was located in Alexandria, Egypt?",
+    "options": [
+      "The Colossus",
+      "The Lighthouse",
+      "The Hanging Gardens"
+    ],
+    "answer": "The Lighthouse",
+    "category": "History"
+  },
+  {
+    "question": "Which empire built the Colosseum?",
+    "options": [
+      "Greek",
+      "Roman",
+      "Ottoman"
+    ],
+    "answer": "Roman",
+    "category": "History"
+  },
+  {
+    "question": "In what year did the Titanic sink?",
+    "options": [
+      "1910",
+      "1912",
+      "1914"
+    ],
+    "answer": "1912",
+    "category": "History"
+  },
+  {
+    "question": "Who discovered penicillin?",
+    "options": [
+      "Marie Curie",
+      "Alexander Fleming",
+      "Louis Pasteur"
+    ],
+    "answer": "Alexander Fleming",
+    "category": "History"
+  },
+  {
+    "question": "Which country gifted the Statue of Liberty to the USA?",
+    "options": [
+      "England",
+      "France",
+      "Germany"
+    ],
+    "answer": "France",
+    "category": "History"
+  },
+  {
+    "question": "What wall fell in 1989?",
+    "options": [
+      "Great Wall of China",
+      "Berlin Wall",
+      "Hadrian's Wall"
+    ],
+    "answer": "Berlin Wall",
+    "category": "History"
+  },
+  {
+    "question": "Who wrote the Declaration of Independence?",
+    "options": [
+      "Benjamin Franklin",
+      "Thomas Jefferson",
+      "George Washington"
+    ],
+    "answer": "Thomas Jefferson",
+    "category": "History"
+  },
+  {
+    "question": "Which civilization built Machu Picchu?",
+    "options": [
+      "Aztec",
+      "Maya",
+      "Inca"
+    ],
+    "answer": "Inca",
+    "category": "History"
+  },
+  {
+    "question": "What was the longest war in history?",
+    "options": [
+      "Hundred Years' War",
+      "Thirty Years' War",
+      "Reconquista"
+    ],
+    "answer": "Reconquista",
+    "category": "History"
+  },
+  {
+    "question": "Who was the first person to walk on the Moon?",
+    "options": [
+      "Buzz Aldrin",
+      "Neil Armstrong",
+      "Yuri Gagarin"
+    ],
+    "answer": "Neil Armstrong",
+    "category": "History"
+  },
+  {
+    "question": "In which city were the first modern Olympics held?",
+    "options": [
+      "Paris",
+      "Athens",
+      "London"
+    ],
+    "answer": "Athens",
+    "category": "History"
+  },
+  {
+    "question": "What year did India gain independence?",
+    "options": [
+      "1945",
+      "1947",
+      "1950"
+    ],
+    "answer": "1947",
+    "category": "History"
+  },
+  {
+    "question": "Who was known as the Iron Lady?",
+    "options": [
+      "Angela Merkel",
+      "Margaret Thatcher",
+      "Indira Gandhi"
+    ],
+    "answer": "Margaret Thatcher",
+    "category": "History"
+  },
+  {
+    "question": "Which explorer discovered America in 1492?",
+    "options": [
+      "Vasco da Gama",
+      "Christopher Columbus",
+      "Ferdinand Magellan"
+    ],
+    "answer": "Christopher Columbus",
+    "category": "History"
+  },
+  {
+    "question": "What ancient city was buried by Mount Vesuvius?",
+    "options": [
+      "Rome",
+      "Pompeii",
+      "Athens"
+    ],
+    "answer": "Pompeii",
+    "category": "History"
+  },
+  {
+    "question": "Who invented the telephone?",
+    "options": [
+      "Thomas Edison",
+      "Alexander Graham Bell",
+      "Nikola Tesla"
+    ],
+    "answer": "Alexander Graham Bell",
+    "category": "History"
+  },
+  {
+    "question": "What treaty ended World War I?",
+    "options": [
+      "Treaty of Paris",
+      "Treaty of Versailles",
+      "Treaty of Ghent"
+    ],
+    "answer": "Treaty of Versailles",
+    "category": "History"
+  },
+  {
+    "question": "What is the capital of Japan?",
+    "options": [
+      "Osaka",
+      "Tokyo",
+      "Kyoto"
+    ],
+    "answer": "Tokyo",
+    "category": "Geography"
+  },
+  {
+    "question": "Which is the largest continent by area?",
+    "options": [
+      "Africa",
+      "Asia",
+      "North America"
+    ],
+    "answer": "Asia",
+    "category": "Geography"
+  },
+  {
+    "question": "What is the longest river in the world?",
+    "options": [
+      "Amazon",
+      "Nile",
+      "Mississippi"
+    ],
+    "answer": "Nile",
+    "category": "Geography"
+  },
+  {
+    "question": "Which country has the most population?",
+    "options": [
+      "India",
+      "China",
+      "USA"
+    ],
+    "answer": "India",
+    "category": "Geography"
+  },
+  {
+    "question": "What is the smallest country in the world?",
+    "options": [
+      "Monaco",
+      "Vatican City",
+      "San Marino"
+    ],
+    "answer": "Vatican City",
+    "category": "Geography"
+  },
+  {
+    "question": "Which desert is the largest in the world?",
+    "options": [
+      "Sahara",
+      "Antarctic",
+      "Gobi"
+    ],
+    "answer": "Antarctic",
+    "category": "Geography"
+  },
+  {
+    "question": "What ocean is the deepest?",
+    "options": [
+      "Atlantic",
+      "Indian",
+      "Pacific"
+    ],
+    "answer": "Pacific",
+    "category": "Geography"
+  },
+  {
+    "question": "Which country is known as the Land of the Rising Sun?",
+    "options": [
+      "China",
+      "Japan",
+      "Thailand"
+    ],
+    "answer": "Japan",
+    "category": "Geography"
+  },
+  {
+    "question": "What is the capital of Australia?",
+    "options": [
+      "Sydney",
+      "Melbourne",
+      "Canberra"
+    ],
+    "answer": "Canberra",
+    "category": "Geography"
+  },
+  {
+    "question": "Which river flows through London?",
+    "options": [
+      "Seine",
+      "Thames",
+      "Danube"
+    ],
+    "answer": "Thames",
+    "category": "Geography"
+  },
+  {
+    "question": "What is the tallest mountain in the world?",
+    "options": [
+      "K2",
+      "Mount Everest",
+      "Kangchenjunga"
+    ],
+    "answer": "Mount Everest",
+    "category": "Geography"
+  },
+  {
+    "question": "Which country has the most time zones?",
+    "options": [
+      "Russia",
+      "USA",
+      "France"
+    ],
+    "answer": "France",
+    "category": "Geography"
+  },
+  {
+    "question": "What is the capital of Canada?",
+    "options": [
+      "Toronto",
+      "Vancouver",
+      "Ottawa"
+    ],
+    "answer": "Ottawa",
+    "category": "Geography"
+  },
+  {
+    "question": "Which African country was formerly known as Abyssinia?",
+    "options": [
+      "Kenya",
+      "Ethiopia",
+      "Nigeria"
+    ],
+    "answer": "Ethiopia",
+    "category": "Geography"
+  },
+  {
+    "question": "What is the largest island in the world?",
+    "options": [
+      "Borneo",
+      "Greenland",
+      "Madagascar"
+    ],
+    "answer": "Greenland",
+    "category": "Geography"
+  },
+  {
+    "question": "Which country is shaped like a boot?",
+    "options": [
+      "Spain",
+      "Italy",
+      "Greece"
+    ],
+    "answer": "Italy",
+    "category": "Geography"
+  },
+  {
+    "question": "What is the capital of Brazil?",
+    "options": [
+      "Rio de Janeiro",
+      "São Paulo",
+      "Brasília"
+    ],
+    "answer": "Brasília",
+    "category": "Geography"
+  },
+  {
+    "question": "Which strait separates Europe and Africa?",
+    "options": [
+      "Strait of Hormuz",
+      "Strait of Gibraltar",
+      "Bosphorus Strait"
+    ],
+    "answer": "Strait of Gibraltar",
+    "category": "Geography"
+  },
+  {
+    "question": "What is the driest continent?",
+    "options": [
+      "Africa",
+      "Antarctica",
+      "Australia"
+    ],
+    "answer": "Antarctica",
+    "category": "Geography"
+  },
+  {
+    "question": "Which country has the most islands?",
+    "options": [
+      "Indonesia",
+      "Philippines",
+      "Sweden"
+    ],
+    "answer": "Sweden",
+    "category": "Geography"
+  },
+  {
+    "question": "Who directed the movie 'Inception'?",
+    "options": [
+      "Steven Spielberg",
+      "Christopher Nolan",
+      "James Cameron"
+    ],
+    "answer": "Christopher Nolan",
+    "category": "Entertainment"
+  },
+  {
+    "question": "What is the name of Batman's butler?",
+    "options": [
+      "Jarvis",
+      "Alfred",
+      "Watson"
+    ],
+    "answer": "Alfred",
+    "category": "Entertainment"
+  },
+  {
+    "question": "Which band sang 'Bohemian Rhapsody'?",
+    "options": [
+      "The Beatles",
+      "Queen",
+      "Led Zeppelin"
+    ],
+    "answer": "Queen",
+    "category": "Entertainment"
+  },
+  {
+    "question": "In 'The Lion King', what is Simba's father's name?",
+    "options": [
+      "Scar",
+      "Mufasa",
+      "Rafiki"
+    ],
+    "answer": "Mufasa",
+    "category": "Entertainment"
+  },
+  {
+    "question": "What fictional country is Black Panther from?",
+    "options": [
+      "Genosha",
+      "Wakanda",
+      "Latveria"
+    ],
+    "answer": "Wakanda",
+    "category": "Entertainment"
+  },
+  {
+    "question": "Who played Jack in the movie 'Titanic'?",
+    "options": [
+      "Brad Pitt",
+      "Leonardo DiCaprio",
+      "Tom Hanks"
+    ],
+    "answer": "Leonardo DiCaprio",
+    "category": "Entertainment"
+  },
+  {
+    "question": "What is the highest-grossing film of all time?",
+    "options": [
+      "Avengers: Endgame",
+      "Avatar",
+      "Titanic"
+    ],
+    "answer": "Avatar",
+    "category": "Entertainment"
+  },
+  {
+    "question": "Who is the author of Harry Potter?",
+    "options": [
+      "J.R.R. Tolkien",
+      "J.K. Rowling",
+      "George R.R. Martin"
+    ],
+    "answer": "J.K. Rowling",
+    "category": "Entertainment"
+  },
+  {
+    "question": "What is the name of the Pixar movie about a rat who cooks?",
+    "options": [
+      "Ratatouille",
+      "Coco",
+      "Up"
+    ],
+    "answer": "Ratatouille",
+    "category": "Entertainment"
+  },
+  {
+    "question": "Which TV show features a character named Walter White?",
+    "options": [
+      "Dexter",
+      "Breaking Bad",
+      "Narcos"
+    ],
+    "answer": "Breaking Bad",
+    "category": "Entertainment"
+  },
+  {
+    "question": "What instrument has 88 keys?",
+    "options": [
+      "Guitar",
+      "Piano",
+      "Accordion"
+    ],
+    "answer": "Piano",
+    "category": "Entertainment"
+  },
+  {
+    "question": "Who sang 'Shape of You'?",
+    "options": [
+      "Justin Bieber",
+      "Ed Sheeran",
+      "Shawn Mendes"
+    ],
+    "answer": "Ed Sheeran",
+    "category": "Entertainment"
+  },
+  {
+    "question": "What is the name of the hobbit played by Elijah Wood?",
+    "options": [
+      "Bilbo",
+      "Frodo",
+      "Samwise"
+    ],
+    "answer": "Frodo",
+    "category": "Entertainment"
+  },
+  {
+    "question": "Which Disney princess has ice powers?",
+    "options": [
+      "Rapunzel",
+      "Elsa",
+      "Moana"
+    ],
+    "answer": "Elsa",
+    "category": "Entertainment"
+  },
+  {
+    "question": "What is the main language spoken in 'Squid Game'?",
+    "options": [
+      "Japanese",
+      "Korean",
+      "Mandarin"
+    ],
+    "answer": "Korean",
+    "category": "Entertainment"
+  },
+  {
+    "question": "Who voices Woody in 'Toy Story'?",
+    "options": [
+      "Tim Allen",
+      "Tom Hanks",
+      "Robin Williams"
+    ],
+    "answer": "Tom Hanks",
+    "category": "Entertainment"
+  },
+  {
+    "question": "What year was the first iPhone released?",
+    "options": [
+      "2005",
+      "2007",
+      "2009"
+    ],
+    "answer": "2007",
+    "category": "Entertainment"
+  },
+  {
+    "question": "Which superhero is Peter Parker?",
+    "options": [
+      "Superman",
+      "Spider-Man",
+      "Flash"
+    ],
+    "answer": "Spider-Man",
+    "category": "Entertainment"
+  },
+  {
+    "question": "What Netflix series is set in the 1980s with a monster called the Demogorgon?",
+    "options": [
+      "Dark",
+      "Stranger Things",
+      "The OA"
+    ],
+    "answer": "Stranger Things",
+    "category": "Entertainment"
+  },
+  {
+    "question": "Who painted 'The Starry Night'?",
+    "options": [
+      "Claude Monet",
+      "Vincent van Gogh",
+      "Pablo Picasso"
+    ],
+    "answer": "Vincent van Gogh",
+    "category": "Entertainment"
+  },
+  {
+    "question": "In which sport is the term 'love' used for a score of zero?",
+    "options": [
+      "Badminton",
+      "Tennis",
+      "Table Tennis"
+    ],
+    "answer": "Tennis",
+    "category": "Sports"
+  },
+  {
+    "question": "How many players are on a soccer team on the field?",
+    "options": [
+      "9",
+      "11",
+      "13"
+    ],
+    "answer": "11",
+    "category": "Sports"
+  },
+  {
+    "question": "Which country won the 2022 FIFA World Cup?",
+    "options": [
+      "France",
+      "Argentina",
+      "Brazil"
+    ],
+    "answer": "Argentina",
+    "category": "Sports"
+  },
+  {
+    "question": "What sport is played at Wimbledon?",
+    "options": [
+      "Cricket",
+      "Tennis",
+      "Golf"
+    ],
+    "answer": "Tennis",
+    "category": "Sports"
+  },
+  {
+    "question": "How many rings are on the Olympic flag?",
+    "options": [
+      "4",
+      "5",
+      "6"
+    ],
+    "answer": "5",
+    "category": "Sports"
+  },
+  {
+    "question": "In basketball, how many points is a free throw worth?",
+    "options": [
+      "1",
+      "2",
+      "3"
+    ],
+    "answer": "1",
+    "category": "Sports"
+  },
+  {
+    "question": "Which sport uses a shuttlecock?",
+    "options": [
+      "Tennis",
+      "Badminton",
+      "Squash"
+    ],
+    "answer": "Badminton",
+    "category": "Sports"
+  },
+  {
+    "question": "Who holds the record for most goals in World Cup history?",
+    "options": [
+      "Pelé",
+      "Miroslav Klose",
+      "Ronaldo"
+    ],
+    "answer": "Miroslav Klose",
+    "category": "Sports"
+  },
+  {
+    "question": "What is the national sport of Japan?",
+    "options": [
+      "Judo",
+      "Sumo",
+      "Karate"
+    ],
+    "answer": "Sumo",
+    "category": "Sports"
+  },
+  {
+    "question": "How long is a marathon in miles (approximately)?",
+    "options": [
+      "20.2",
+      "26.2",
+      "30.2"
+    ],
+    "answer": "26.2",
+    "category": "Sports"
+  },
+  {
+    "question": "Which country invented cricket?",
+    "options": [
+      "India",
+      "Australia",
+      "England"
+    ],
+    "answer": "England",
+    "category": "Sports"
+  },
+  {
+    "question": "In baseball, how many strikes make an out?",
+    "options": [
+      "2",
+      "3",
+      "4"
+    ],
+    "answer": "3",
+    "category": "Sports"
+  },
+  {
+    "question": "What sport does Tiger Woods play?",
+    "options": [
+      "Tennis",
+      "Golf",
+      "Polo"
+    ],
+    "answer": "Golf",
+    "category": "Sports"
+  },
+  {
+    "question": "How many sets does a player need to win in a men's Grand Slam tennis match?",
+    "options": [
+      "2",
+      "3",
+      "5"
+    ],
+    "answer": "3",
+    "category": "Sports"
+  },
+  {
+    "question": "Which NBA player is known as 'King James'?",
+    "options": [
+      "Michael Jordan",
+      "LeBron James",
+      "Kobe Bryant"
+    ],
+    "answer": "LeBron James",
+    "category": "Sports"
+  },
+  {
+    "question": "In which sport do you perform a slam dunk?",
+    "options": [
+      "Volleyball",
+      "Basketball",
+      "Handball"
+    ],
+    "answer": "Basketball",
+    "category": "Sports"
+  },
+  {
+    "question": "What country has won the most Cricket World Cups?",
+    "options": [
+      "India",
+      "Australia",
+      "West Indies"
+    ],
+    "answer": "Australia",
+    "category": "Sports"
+  },
+  {
+    "question": "Which sport is known as the 'king of sports'?",
+    "options": [
+      "Basketball",
+      "Football (Soccer)",
+      "Cricket"
+    ],
+    "answer": "Football (Soccer)",
+    "category": "Sports"
+  },
+  {
+    "question": "How many holes are in a standard round of golf?",
+    "options": [
+      "9",
+      "18",
+      "21"
+    ],
+    "answer": "18",
+    "category": "Sports"
+  },
+  {
+    "question": "What does 'FIFA' stand for?",
+    "options": [
+      "Federation Internationale de Football Association",
+      "Football International Federation Association",
+      "Federal International Football Authority"
+    ],
+    "answer": "Federation Internationale de Football Association",
+    "category": "Sports"
+  },
+  {
+    "question": "Who founded Microsoft?",
+    "options": [
+      "Steve Jobs",
+      "Bill Gates",
+      "Mark Zuckerberg"
+    ],
+    "answer": "Bill Gates",
+    "category": "Technology"
+  },
+  {
+    "question": "What does 'HTTP' stand for?",
+    "options": [
+      "HyperText Transfer Protocol",
+      "High Transfer Text Protocol",
+      "HyperText Transmission Process"
+    ],
+    "answer": "HyperText Transfer Protocol",
+    "category": "Technology"
+  },
+  {
+    "question": "What programming language is known as the 'language of the web'?",
+    "options": [
+      "Python",
+      "JavaScript",
+      "Java"
+    ],
+    "answer": "JavaScript",
+    "category": "Technology"
+  },
+  {
+    "question": "What does 'CPU' stand for?",
+    "options": [
+      "Central Processing Unit",
+      "Core Processing Unit",
+      "Computer Primary Unit"
+    ],
+    "answer": "Central Processing Unit",
+    "category": "Technology"
+  },
+  {
+    "question": "Who is the CEO of Tesla?",
+    "options": [
+      "Jeff Bezos",
+      "Elon Musk",
+      "Tim Cook"
+    ],
+    "answer": "Elon Musk",
+    "category": "Technology"
+  },
+  {
+    "question": "In what year was Google founded?",
+    "options": [
+      "1996",
+      "1998",
+      "2000"
+    ],
+    "answer": "1998",
+    "category": "Technology"
+  },
+  {
+    "question": "What does 'URL' stand for?",
+    "options": [
+      "Uniform Resource Locator",
+      "Universal Resource Link",
+      "Unified Resource Location"
+    ],
+    "answer": "Uniform Resource Locator",
+    "category": "Technology"
+  },
+  {
+    "question": "Which company developed the Android operating system?",
+    "options": [
+      "Apple",
+      "Google",
+      "Microsoft"
+    ],
+    "answer": "Google",
+    "category": "Technology"
+  },
+  {
+    "question": "What is the binary system based on?",
+    "options": [
+      "0 and 1",
+      "1 and 2",
+      "0 and 9"
+    ],
+    "answer": "0 and 1",
+    "category": "Technology"
+  },
+  {
+    "question": "What does 'RAM' stand for?",
+    "options": [
+      "Random Access Memory",
+      "Read Access Memory",
+      "Rapid Access Module"
+    ],
+    "answer": "Random Access Memory",
+    "category": "Technology"
+  },
+  {
+    "question": "Which company created the iPhone?",
+    "options": [
+      "Samsung",
+      "Apple",
+      "Nokia"
+    ],
+    "answer": "Apple",
+    "category": "Technology"
+  },
+  {
+    "question": "What does 'AI' stand for?",
+    "options": [
+      "Automated Intelligence",
+      "Artificial Intelligence",
+      "Applied Informatics"
+    ],
+    "answer": "Artificial Intelligence",
+    "category": "Technology"
+  },
+  {
+    "question": "What year was Facebook launched?",
+    "options": [
+      "2002",
+      "2004",
+      "2006"
+    ],
+    "answer": "2004",
+    "category": "Technology"
+  },
+  {
+    "question": "What does 'SSD' stand for?",
+    "options": [
+      "Solid State Drive",
+      "Super Speed Disk",
+      "System Storage Device"
+    ],
+    "answer": "Solid State Drive",
+    "category": "Technology"
+  },
+  {
+    "question": "Who created Linux?",
+    "options": [
+      "Bill Gates",
+      "Linus Torvalds",
+      "Dennis Ritchie"
+    ],
+    "answer": "Linus Torvalds",
+    "category": "Technology"
+  },
+  {
+    "question": "What does 'IoT' stand for?",
+    "options": [
+      "Internet of Things",
+      "Integration of Technology",
+      "Internet of Tools"
+    ],
+    "answer": "Internet of Things",
+    "category": "Technology"
+  },
+  {
+    "question": "Which programming language was created by Guido van Rossum?",
+    "options": [
+      "Ruby",
+      "Python",
+      "Perl"
+    ],
+    "answer": "Python",
+    "category": "Technology"
+  },
+  {
+    "question": "What does 'VPN' stand for?",
+    "options": [
+      "Virtual Private Network",
+      "Visual Processing Node",
+      "Verified Personal Network"
+    ],
+    "answer": "Virtual Private Network",
+    "category": "Technology"
+  },
+  {
+    "question": "What company makes the PlayStation?",
+    "options": [
+      "Microsoft",
+      "Sony",
+      "Nintendo"
+    ],
+    "answer": "Sony",
+    "category": "Technology"
+  },
+  {
+    "question": "What does 'HTML' stand for?",
+    "options": [
+      "HyperText Markup Language",
+      "High Transfer Markup Language",
+      "HyperTool Multi Language"
+    ],
+    "answer": "HyperText Markup Language",
+    "category": "Technology"
+  },
+  {
+    "question": "What is the largest animal on Earth?",
+    "options": [
+      "African Elephant",
+      "Blue Whale",
+      "Giraffe"
+    ],
+    "answer": "Blue Whale",
+    "category": "Nature"
+  },
+  {
+    "question": "What is the fastest land animal?",
+    "options": [
+      "Cheetah",
+      "Lion",
+      "Gazelle"
+    ],
+    "answer": "Cheetah",
+    "category": "Nature"
+  },
+  {
+    "question": "How many hearts does an octopus have?",
+    "options": [
+      "1",
+      "2",
+      "3"
+    ],
+    "answer": "3",
+    "category": "Nature"
+  },
+  {
+    "question": "What is the tallest animal in the world?",
+    "options": [
+      "Elephant",
+      "Giraffe",
+      "Ostrich"
+    ],
+    "answer": "Giraffe",
+    "category": "Nature"
+  },
+  {
+    "question": "Which bird can fly backwards?",
+    "options": [
+      "Eagle",
+      "Hummingbird",
+      "Owl"
+    ],
+    "answer": "Hummingbird",
+    "category": "Nature"
+  },
+  {
+    "question": "What is a group of wolves called?",
+    "options": [
+      "Flock",
+      "Pack",
+      "Herd"
+    ],
+    "answer": "Pack",
+    "category": "Nature"
+  },
+  {
+    "question": "How many legs does a spider have?",
+    "options": [
+      "6",
+      "8",
+      "10"
+    ],
+    "answer": "8",
+    "category": "Nature"
+  },
+  {
+    "question": "What is the largest species of shark?",
+    "options": [
+      "Great White",
+      "Whale Shark",
+      "Hammerhead"
+    ],
+    "answer": "Whale Shark",
+    "category": "Nature"
+  },
+  {
+    "question": "Which animal is known for its black and white stripes?",
+    "options": [
+      "Cheetah",
+      "Zebra",
+      "Panda"
+    ],
+    "answer": "Zebra",
+    "category": "Nature"
+  },
+  {
+    "question": "What is the only mammal that can truly fly?",
+    "options": [
+      "Flying Squirrel",
+      "Bat",
+      "Sugar Glider"
+    ],
+    "answer": "Bat",
+    "category": "Nature"
+  },
+  {
+    "question": "How long can a snail sleep?",
+    "options": [
+      "3 months",
+      "3 years",
+      "3 weeks"
+    ],
+    "answer": "3 years",
+    "category": "Nature"
+  },
+  {
+    "question": "What animal has the longest lifespan?",
+    "options": [
+      "Elephant",
+      "Tortoise",
+      "Whale"
+    ],
+    "answer": "Tortoise",
+    "category": "Nature"
+  },
+  {
+    "question": "Which animal is known as man's best friend?",
+    "options": [
+      "Cat",
+      "Dog",
+      "Horse"
+    ],
+    "answer": "Dog",
+    "category": "Nature"
+  },
+  {
+    "question": "What is the largest flower in the world?",
+    "options": [
+      "Sunflower",
+      "Rafflesia",
+      "Lotus"
+    ],
+    "answer": "Rafflesia",
+    "category": "Nature"
+  },
+  {
+    "question": "Which animal can change its color?",
+    "options": [
+      "Gecko",
+      "Chameleon",
+      "Iguana"
+    ],
+    "answer": "Chameleon",
+    "category": "Nature"
+  },
+  {
+    "question": "What is the only continent without native reptiles?",
+    "options": [
+      "Europe",
+      "Antarctica",
+      "Australia"
+    ],
+    "answer": "Antarctica",
+    "category": "Nature"
+  },
+  {
+    "question": "How many stomachs does a cow have?",
+    "options": [
+      "2",
+      "3",
+      "4"
+    ],
+    "answer": "4",
+    "category": "Nature"
+  },
+  {
+    "question": "What tree do acorns come from?",
+    "options": [
+      "Maple",
+      "Oak",
+      "Pine"
+    ],
+    "answer": "Oak",
+    "category": "Nature"
+  },
+  {
+    "question": "Which insect can carry 50 times its own body weight?",
+    "options": [
+      "Bee",
+      "Ant",
+      "Beetle"
+    ],
+    "answer": "Ant",
+    "category": "Nature"
+  },
+  {
+    "question": "What is the largest cat species?",
+    "options": [
+      "Lion",
+      "Tiger",
+      "Jaguar"
+    ],
+    "answer": "Tiger",
+    "category": "Nature"
+  },
+  {
+    "question": "What Italian dish is made of layers of pasta, meat sauce, and cheese?",
+    "options": [
+      "Ravioli",
+      "Lasagna",
+      "Risotto"
+    ],
+    "answer": "Lasagna",
+    "category": "Food"
+  },
+  {
+    "question": "Which fruit is known as the 'king of fruits'?",
+    "options": [
+      "Mango",
+      "Durian",
+      "Pineapple"
+    ],
+    "answer": "Durian",
+    "category": "Food"
+  },
+  {
+    "question": "What is the main ingredient in hummus?",
+    "options": [
+      "Lentils",
+      "Chickpeas",
+      "Kidney Beans"
+    ],
+    "answer": "Chickpeas",
+    "category": "Food"
+  },
+  {
+    "question": "Which country is famous for sushi?",
+    "options": [
+      "China",
+      "Japan",
+      "South Korea"
+    ],
+    "answer": "Japan",
+    "category": "Food"
+  },
+  {
+    "question": "What is the most consumed beverage in the world after water?",
+    "options": [
+      "Coffee",
+      "Tea",
+      "Milk"
+    ],
+    "answer": "Tea",
+    "category": "Food"
+  },
+  {
+    "question": "Which spice is known as the most expensive in the world?",
+    "options": [
+      "Vanilla",
+      "Saffron",
+      "Cardamom"
+    ],
+    "answer": "Saffron",
+    "category": "Food"
+  },
+  {
+    "question": "What type of pasta is shaped like a bow tie?",
+    "options": [
+      "Penne",
+      "Farfalle",
+      "Fusilli"
+    ],
+    "answer": "Farfalle",
+    "category": "Food"
+  },
+  {
+    "question": "Which nut is used to make marzipan?",
+    "options": [
+      "Walnut",
+      "Almond",
+      "Cashew"
+    ],
+    "answer": "Almond",
+    "category": "Food"
+  },
+  {
+    "question": "What country does Gouda cheese come from?",
+    "options": [
+      "Switzerland",
+      "Netherlands",
+      "France"
+    ],
+    "answer": "Netherlands",
+    "category": "Food"
+  },
+  {
+    "question": "Which fruit gives its name to a popular smartphone brand?",
+    "options": [
+      "Banana",
+      "Apple",
+      "Blackberry"
+    ],
+    "answer": "Apple",
+    "category": "Food"
+  },
+  {
+    "question": "What grain is sake made from?",
+    "options": [
+      "Wheat",
+      "Rice",
+      "Barley"
+    ],
+    "answer": "Rice",
+    "category": "Food"
+  },
+  {
+    "question": "What is the main ingredient in guacamole?",
+    "options": [
+      "Tomato",
+      "Avocado",
+      "Lime"
+    ],
+    "answer": "Avocado",
+    "category": "Food"
+  },
+  {
+    "question": "Which country is the largest producer of coffee?",
+    "options": [
+      "Colombia",
+      "Brazil",
+      "Ethiopia"
+    ],
+    "answer": "Brazil",
+    "category": "Food"
+  },
+  {
+    "question": "What vegetable is the main ingredient in coleslaw?",
+    "options": [
+      "Lettuce",
+      "Cabbage",
+      "Kale"
+    ],
+    "answer": "Cabbage",
+    "category": "Food"
+  },
+  {
+    "question": "What is tofu made from?",
+    "options": [
+      "Rice",
+      "Soybeans",
+      "Wheat"
+    ],
+    "answer": "Soybeans",
+    "category": "Food"
+  },
+  {
+    "question": "Which country invented pizza?",
+    "options": [
+      "France",
+      "Italy",
+      "Greece"
+    ],
+    "answer": "Italy",
+    "category": "Food"
+  },
+  {
+    "question": "What vitamin do you get from sunlight?",
+    "options": [
+      "Vitamin A",
+      "Vitamin C",
+      "Vitamin D"
+    ],
+    "answer": "Vitamin D",
+    "category": "Food"
+  },
+  {
+    "question": "What is the hottest chili pepper in the world (as of 2023)?",
+    "options": [
+      "Carolina Reaper",
+      "Ghost Pepper",
+      "Habanero"
+    ],
+    "answer": "Carolina Reaper",
+    "category": "Food"
+  },
+  {
+    "question": "Which cuisine is 'kimchi' associated with?",
+    "options": [
+      "Japanese",
+      "Korean",
+      "Chinese"
+    ],
+    "answer": "Korean",
+    "category": "Food"
+  },
+  {
+    "question": "What type of food is 'brie'?",
+    "options": [
+      "Bread",
+      "Cheese",
+      "Sausage"
+    ],
+    "answer": "Cheese",
+    "category": "Food"
+  },
+  {
+    "question": "Who wrote 'Romeo and Juliet'?",
+    "options": [
+      "Charles Dickens",
+      "William Shakespeare",
+      "Jane Austen"
+    ],
+    "answer": "William Shakespeare",
+    "category": "Literature"
+  },
+  {
+    "question": "What is the first book of the Bible?",
+    "options": [
+      "Exodus",
+      "Genesis",
+      "Leviticus"
+    ],
+    "answer": "Genesis",
+    "category": "Literature"
+  },
+  {
+    "question": "Who wrote '1984'?",
+    "options": [
+      "Aldous Huxley",
+      "George Orwell",
+      "Ray Bradbury"
+    ],
+    "answer": "George Orwell",
+    "category": "Literature"
+  },
+  {
+    "question": "What is the name of Sherlock Holmes' assistant?",
+    "options": [
+      "Dr. Watson",
+      "Inspector Lestrade",
+      "Mycroft"
+    ],
+    "answer": "Dr. Watson",
+    "category": "Literature"
+  },
+  {
+    "question": "Who wrote 'The Great Gatsby'?",
+    "options": [
+      "Ernest Hemingway",
+      "F. Scott Fitzgerald",
+      "Mark Twain"
+    ],
+    "answer": "F. Scott Fitzgerald",
+    "category": "Literature"
+  },
+  {
+    "question": "In which language was 'Don Quixote' originally written?",
+    "options": [
+      "Portuguese",
+      "Spanish",
+      "Italian"
+    ],
+    "answer": "Spanish",
+    "category": "Literature"
+  },
+  {
+    "question": "Who wrote 'Pride and Prejudice'?",
+    "options": [
+      "Charlotte Brontë",
+      "Jane Austen",
+      "Emily Brontë"
+    ],
+    "answer": "Jane Austen",
+    "category": "Literature"
+  },
+  {
+    "question": "What is the longest novel ever written?",
+    "options": [
+      "War and Peace",
+      "In Search of Lost Time",
+      "Les Misérables"
+    ],
+    "answer": "In Search of Lost Time",
+    "category": "Literature"
+  },
+  {
+    "question": "Who wrote 'To Kill a Mockingbird'?",
+    "options": [
+      "Harper Lee",
+      "John Steinbeck",
+      "Truman Capote"
+    ],
+    "answer": "Harper Lee",
+    "category": "Literature"
+  },
+  {
+    "question": "What genre is the book 'Dracula'?",
+    "options": [
+      "Sci-Fi",
+      "Gothic Horror",
+      "Mystery"
+    ],
+    "answer": "Gothic Horror",
+    "category": "Literature"
+  },
+  {
+    "question": "How many notes are in a musical octave?",
+    "options": [
+      "7",
+      "8",
+      "12"
+    ],
+    "answer": "8",
+    "category": "Music"
+  },
+  {
+    "question": "What instrument does a drummer play?",
+    "options": [
+      "Drums",
+      "Bass Guitar",
+      "Keyboard"
+    ],
+    "answer": "Drums",
+    "category": "Music"
+  },
+  {
+    "question": "Who is known as the 'King of Pop'?",
+    "options": [
+      "Elvis Presley",
+      "Michael Jackson",
+      "Prince"
+    ],
+    "answer": "Michael Jackson",
+    "category": "Music"
+  },
+  {
+    "question": "What country did 'K-Pop' originate from?",
+    "options": [
+      "Japan",
+      "South Korea",
+      "China"
+    ],
+    "answer": "South Korea",
+    "category": "Music"
+  },
+  {
+    "question": "Which Beatles album features a zebra crossing on its cover?",
+    "options": [
+      "Let It Be",
+      "Abbey Road",
+      "Revolver"
+    ],
+    "answer": "Abbey Road",
+    "category": "Music"
+  },
+  {
+    "question": "What is the national anthem of the United States called?",
+    "options": [
+      "God Bless America",
+      "The Star-Spangled Banner",
+      "America the Beautiful"
+    ],
+    "answer": "The Star-Spangled Banner",
+    "category": "Music"
+  },
+  {
+    "question": "Which instrument has the most strings in a standard orchestra?",
+    "options": [
+      "Violin",
+      "Harp",
+      "Guitar"
+    ],
+    "answer": "Harp",
+    "category": "Music"
+  },
+  {
+    "question": "Who composed 'Für Elise'?",
+    "options": [
+      "Mozart",
+      "Beethoven",
+      "Bach"
+    ],
+    "answer": "Beethoven",
+    "category": "Music"
+  },
+  {
+    "question": "What music genre originated in Jamaica?",
+    "options": [
+      "Salsa",
+      "Reggae",
+      "Samba"
+    ],
+    "answer": "Reggae",
+    "category": "Music"
+  },
+  {
+    "question": "How many strings does a standard guitar have?",
+    "options": [
+      "4",
+      "6",
+      "8"
+    ],
+    "answer": "6",
+    "category": "Music"
+  },
+  {
+    "question": "What does 'www' stand for in a website URL?",
+    "options": [
+      "World Wide Web",
+      "Western Wired Web",
+      "Wide World Web"
+    ],
+    "answer": "World Wide Web",
+    "category": "General Knowledge"
+  },
+  {
+    "question": "How many sides does a hexagon have?",
+    "options": [
+      "5",
+      "6",
+      "8"
+    ],
+    "answer": "6",
+    "category": "General Knowledge"
+  },
+  {
+    "question": "What color is a ruby?",
+    "options": [
+      "Blue",
+      "Green",
+      "Red"
+    ],
+    "answer": "Red",
+    "category": "General Knowledge"
+  },
+  {
+    "question": "What is the square root of 144?",
+    "options": [
+      "10",
+      "12",
+      "14"
+    ],
+    "answer": "12",
+    "category": "General Knowledge"
+  },
+  {
+    "question": "How many continents are there?",
+    "options": [
+      "5",
+      "6",
+      "7"
+    ],
+    "answer": "7",
+    "category": "General Knowledge"
+  },
+  {
+    "question": "What color are the stars on the American flag?",
+    "options": [
+      "Red",
+      "White",
+      "Blue"
+    ],
+    "answer": "White",
+    "category": "General Knowledge"
+  },
+  {
+    "question": "What is the currency of the United Kingdom?",
+    "options": [
+      "Euro",
+      "Dollar",
+      "Pound Sterling"
+    ],
+    "answer": "Pound Sterling",
+    "category": "General Knowledge"
+  },
+  {
+    "question": "How many days are in a leap year?",
+    "options": [
+      "365",
+      "366",
+      "364"
+    ],
+    "answer": "366",
+    "category": "General Knowledge"
+  },
+  {
+    "question": "What is the Roman numeral for 50?",
+    "options": [
+      "C",
+      "L",
+      "D"
+    ],
+    "answer": "L",
+    "category": "General Knowledge"
+  },
+  {
+    "question": "Which planet is closest to the Sun?",
+    "options": [
+      "Venus",
+      "Mercury",
+      "Mars"
+    ],
+    "answer": "Mercury",
+    "category": "General Knowledge"
+  }
+]
