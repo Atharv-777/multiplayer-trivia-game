@@ -827,6 +827,120 @@ body::before {
   font-size: 0.9rem;
 }
 
+/* ============ Game End Screen ============ */
+.game-end-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.game-end-trophy {
+  font-size: 3.5rem;
+  display: block;
+  margin-bottom: 8px;
+  animation: float 2.5s ease-in-out infinite;
+}
+
+.game-end-title {
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--accent-amber), #f59e0b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 4px;
+}
+
+.game-end-subtitle {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* Leaderboard list */
+.leaderboard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.leaderboard-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1.5px solid rgba(99, 102, 241, 0.12);
+  border-radius: var(--radius-sm);
+  animation: slideIn 0.3s ease-out both;
+  transition: var(--transition);
+}
+
+.leaderboard-row-winner {
+  background: rgba(251, 191, 36, 0.08);
+  border-color: rgba(251, 191, 36, 0.35);
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.12);
+}
+
+.leaderboard-row-you {
+  border-color: var(--accent-primary);
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.leaderboard-rank {
+  font-size: 1.4rem;
+  min-width: 36px;
+  text-align: center;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+
+.leaderboard-row-winner .leaderboard-rank {
+  color: var(--accent-amber);
+}
+
+.leaderboard-name {
+  flex: 1;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-primary);
+  text-align: left;
+}
+
+.leaderboard-you-tag {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--accent-primary);
+  margin-left: 4px;
+}
+
+.leaderboard-score {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--accent-amber);
+  background: rgba(251, 191, 36, 0.1);
+  padding: 4px 12px;
+  border-radius: 100px;
+  border: 1px solid rgba(251, 191, 36, 0.2);
+}
+
+/* Winner callout */
+.game-end-winner-callout {
+  padding: 14px 20px;
+  background: rgba(52, 211, 153, 0.1);
+  border: 1.5px solid rgba(52, 211, 153, 0.3);
+  border-radius: var(--radius-sm);
+  color: var(--accent-green);
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  animation: cardIn 0.5s ease-out 0.3s both;
+}
+
 /* ============ Responsive ============ */
 @media (max-width: 500px) {
   .card.glass {

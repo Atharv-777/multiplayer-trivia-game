@@ -21,6 +21,8 @@ async function getQuestion(roomCode) {
     if (questionBatch.length == 0) {
         questionBatch = await fetchQuestions(10)
         quesIndexes = _.range(0, questionBatch.length)
+        let questionId = questionBatch.map((ele) => { return ele.id })
+        console.log("QUESTION IDs : ", questionId)
         // room.questions.push(...questionBatch)
     }
 
@@ -33,7 +35,9 @@ async function getQuestion(roomCode) {
     console.log("QUES INDEXES AFTER : " + quesIndexes)
 
     room.questions = questionBatch
-    room.currentRound.questionIndexes = quesIndexes
+    room.currentRound.questionIndexes = quesIndexes || []
+    room.currentRound.question = currentQuestion.question || ""
+    room.currentRound.answer = currentQuestion.answer || ""
     setRoom(roomCode, room)
 
     return currentQuestion

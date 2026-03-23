@@ -18,12 +18,7 @@ export default function JoinRoom() {
       return;
     }
 
-    if (!socket.connected) {
-      socket.connect();
-    }
-
     const onRoomJoined = (data) => {
-
       navigate("/waiting", {
         state: {
           username,
@@ -38,12 +33,23 @@ export default function JoinRoom() {
       setJoining(false);
     };
 
+    const onConnectError = () => {
+      setError("Could not connect to server. Check your connection.");
+      setJoining(false);
+    };
+
     socket.on("room:joined", onRoomJoined);
     socket.on("error", onError);
+    socket.on("connect_error", onConnectError);
+
+    if (!socket.connected) {
+      socket.connect();
+    }
 
     return () => {
       socket.off("room:joined", onRoomJoined);
       socket.off("error", onError);
+      socket.off("connect_error", onConnectError);
     };
   }, [username, navigate]);
 
@@ -51,7 +57,17 @@ export default function JoinRoom() {
     if (!roomCode.trim()) return;
     setError(null);
     setJoining(true);
-    socket.emit("room:join", { username, roomCode: roomCode.trim().toUpperCase() });
+
+    const doJoin = () => {
+      socket.emit("room:join", { username, roomCode: roomCode.trim().toUpperCase() });
+    };
+
+    if (socket.connected) {
+      doJoin();
+    } else {
+      // Socket is still connecting (e.g. first LAN load) — wait for it
+      socket.once("connect", doJoin);
+    }
   };
 
   const handleKeyDown = (e) => {

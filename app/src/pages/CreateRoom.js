@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import socket from "../socketConnection";
 
@@ -12,17 +12,13 @@ export default function CreateRoom() {
   const [players, setPlayers] = useState([]);
   const [error, setError] = useState(null);
 
+  const hasSentCreate = useRef(false);
+
   useEffect(() => {
     if (!username) {
       navigate("/");
       return;
     }
-
-    if (!socket.connected) {
-      socket.connect();
-    }
-
-    socket.emit("room:create", { username });
 
     const onRoomCreated = (data) => {
       console.log(`ROOM CREATE : ${data.roomCode}`)
@@ -43,18 +39,38 @@ export default function CreateRoom() {
       navigate("/game", { state: { username: data.username, roomCode: data.roomCode, currentQuestion: data.currentQuestion } });
     };
 
+    const onConnectError = () => {
+      setError("Could not connect to server. Check your connection.");
+    };
+
+    const doCreate = () => {
+      if (hasSentCreate.current) return;
+      hasSentCreate.current = true;
+      socket.emit("room:create", { username });
+    };
+
     socket.on("room:created", onRoomCreated);
     socket.on("room:player_joined", onPlayerJoined);
     socket.on("game:started", (data) => onGameStarted(data));
     socket.on("error", onError);
+    socket.on("connect_error", onConnectError);
+
+    if (socket.connected) {
+      doCreate();
+    } else {
+      socket.once("connect", doCreate);
+      socket.connect();
+    }
 
     return () => {
       socket.off("room:created", onRoomCreated);
       socket.off("room:player_joined", onPlayerJoined);
       socket.off("game:started", onGameStarted);
       socket.off("error", onError);
+      socket.off("connect_error", onConnectError);
     };
   }, [username, navigate]);
+
 
   const handleStartGame = () => {
     console.log(`USERNAME : ${username} || ROOM CODE : ${roomCode}`)

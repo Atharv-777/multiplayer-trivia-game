@@ -21,7 +21,9 @@ function handleCreateRoom(io, socket, data) {
             status: "waiting",
             questions: [],
             currentRound: {
-                answers: {},
+                question: "",
+                answer: "",
+                playerAnswers: {},
                 questionIndexes: []
             }
         }

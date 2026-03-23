@@ -1,3 +1,7 @@
 node_modules/
 scripts/
 .env
+package-lock.json
+test.js
+packageUpdate.sh
+run.sh

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import socket from "../socketConnection";
+import GameEndScreen from "./GameEndScreen";
 
 export default function GamePage() {
     console.log("GamePage invoked")
@@ -14,7 +15,7 @@ export default function GamePage() {
 
     const [question, setQuestion] = useState(currentQuestion);
     const [selectedOption, setSelectedOption] = useState(null);
-    const [questionNumber, setQuestionNumber] = useState(0);
+    const [questionNumber, setQuestionNumber] = useState(1);
     const [timeLeft, setTimeLeft] = useState(ROUND_TIME);
     const [timerExpired, setTimerExpired] = useState(false);
     const timerRef = useRef(null);
@@ -22,6 +23,7 @@ export default function GamePage() {
     // Answer screen state
     const [showAnswerScreen, setShowAnswerScreen] = useState(false);
     const [isGameComplete, setIsGameComplete] = useState(false);
+    const [leaderboard, setLeaderboard] = useState([]);
     const [nextCountdown, setNextCountdown] = useState(NEXT_QUESTION_DELAY);
     const nextTimerRef = useRef(null);
 
@@ -104,18 +106,20 @@ export default function GamePage() {
         const onRoundEnd = (data) => {
             // Round is over — show the answer screen
             clearTimer();
-            setShowAnswerScreen(true);
             setIsGameComplete(data.isGameComplete || false);
 
-            if (!data.isGameComplete) {
-                // Start countdown to next question
+            if (data.isGameComplete) {
+                // Game finished — store leaderboard and show end screen
+                setLeaderboard(data.leaderboard || []);
+            } else {
+                // Still playing — show answer screen then countdown
+                setShowAnswerScreen(true);
                 setNextCountdown(NEXT_QUESTION_DELAY);
                 nextTimerRef.current = setInterval(() => {
                     setNextCountdown(prev => {
                         if (prev <= 1) {
                             clearInterval(nextTimerRef.current);
                             nextTimerRef.current = null;
-                            // Tell server to send the next question
                             socket.emit("game:nextQuestion", { roomCode });
                             return 0;
                         }
@@ -166,6 +170,11 @@ export default function GamePage() {
     };
 
     if (!username || !roomCode) return null;
+
+    // ───────── Game End Screen ─────────
+    if (isGameComplete) {
+        return <GameEndScreen leaderboard={leaderboard} username={username} />;
+    }
 
     // Waiting for first question from the server
     if (!question) {
@@ -244,35 +253,27 @@ export default function GamePage() {
                         </div>
                     </div>
 
-                    {/* Next question countdown or Game Over */}
-                    {isGameComplete ? (
-                        <div className="game-over-section">
-                            <span className="game-over-icon">🏆</span>
-                            <h3 className="game-over-text">Game Over!</h3>
-                            <p className="game-over-sub">All questions have been answered</p>
+                    {/* Next question countdown */}
+                    <div className="next-question-countdown">
+                        <div className="countdown-ring">
+                            <svg viewBox="0 0 40 40" className="countdown-svg">
+                                <circle
+                                    cx="20" cy="20" r="17"
+                                    className="countdown-track"
+                                />
+                                <circle
+                                    cx="20" cy="20" r="17"
+                                    className="countdown-fill"
+                                    style={{
+                                        strokeDasharray: `${2 * Math.PI * 17}`,
+                                        strokeDashoffset: `${2 * Math.PI * 17 * (1 - nextCountdown / NEXT_QUESTION_DELAY)}`
+                                    }}
+                                />
+                            </svg>
+                            <span className="countdown-number">{nextCountdown}</span>
                         </div>
-                    ) : (
-                        <div className="next-question-countdown">
-                            <div className="countdown-ring">
-                                <svg viewBox="0 0 40 40" className="countdown-svg">
-                                    <circle
-                                        cx="20" cy="20" r="17"
-                                        className="countdown-track"
-                                    />
-                                    <circle
-                                        cx="20" cy="20" r="17"
-                                        className="countdown-fill"
-                                        style={{
-                                            strokeDasharray: `${2 * Math.PI * 17}`,
-                                            strokeDashoffset: `${2 * Math.PI * 17 * (1 - nextCountdown / NEXT_QUESTION_DELAY)}`
-                                        }}
-                                    />
-                                </svg>
-                                <span className="countdown-number">{nextCountdown}</span>
-                            </div>
-                            <span className="countdown-label">Next question in {nextCountdown}s</span>
-                        </div>
-                    )}
+                        <span className="countdown-label">Next question in {nextCountdown}s</span>
+                    </div>
                 </div>
             </div>
         );
