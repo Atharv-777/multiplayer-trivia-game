@@ -1,4 +1,5 @@
 const rooms = new Map()
+const settings = new Map()
 
 function getRoom(roomCode){
     let room = rooms.get(roomCode)
@@ -9,4 +10,13 @@ function setRoom(roomCode, room){
     rooms.set(roomCode, room)
 }
 
-module.exports = { getRoom, setRoom }
+function setSettings(settingsId, setting){
+    settings.set(settingsId, setting)
+}
+
+function getSettings(settingsId){
+    let setting = settings.get(settingsId)
+    return setting
+}
+
+module.exports = { getRoom, setRoom, setSettings, getSettings }

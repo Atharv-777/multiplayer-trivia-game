@@ -1,16 +1,16 @@
-const { getRoom, setRoom } = require("../store");
-const { getQuestion } = require("../utils/QuestionHelper");
+const { getRoom, setRoom, getSettings } = require("../store");
+const { getQuestionSet, getQuestion } = require("../utils/QuestionHelper");
 const _ = require("lodash")
 
-const POINTS_PER_QUESTION = 10
+// const POINTS_PER_QUESTION = 10
 
 async function handleStartGame(io, socket, data) {
     console.log("handleStartGame invoked")
     let username = data.username
     let roomCode = data.roomCode
     console.log(`@Server USERNAME : ${username} and ROOM CODE : ${roomCode}`)
-
     let room = getRoom(roomCode)
+
     if (room) {
         room.status = "playing"
         if (room.currentRound) {
@@ -30,6 +30,7 @@ function handleSubmitAnswer(io, socket, data) {
     let roomCode = data.roomCode
 
     let room = getRoom(roomCode)
+    let setting = getSettings(roomCode)
     if (!room) return; // Prevent crash if server restarted and room doesn't exist
 
     let currentRound = room.currentRound
@@ -44,7 +45,7 @@ function handleSubmitAnswer(io, socket, data) {
     if (_.toLower(data.answer) == _.toLower(room.currentRound.answer)) {
         let currentPlayerDataIndex = _.findIndex(room.players, (currentPlayer) => { return currentPlayer && currentPlayer.socketId == socket.id })
         if (currentPlayerDataIndex != -1) {
-            room.players[currentPlayerDataIndex].score += POINTS_PER_QUESTION
+            room.players[currentPlayerDataIndex].score += setting.POINTS_PER_QUESTION
         }
     }
     setRoom(roomCode, room)

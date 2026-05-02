@@ -1,10 +1,14 @@
-const { getRoom, setRoom } = require("../store");
-const { fetchQuestions } = require("./dbHelper");
+const { getRoom, setRoom, getSettings } = require("../store");
+// const { fetchQuestions } = require("./dbHelper");
+const { downloadFile } = require("./BucketUtils")
 const _ = require("lodash")
 
 async function getQuestion(roomCode) {
     console.log("getQuestion invoked")
     let room = getRoom(roomCode)
+    let setting = getSettings(roomCode)
+
+    console.log("SETTINGS @getQuestion : " + JSON.stringify(setting))
 
     // Safety check: if room doesn't exist (e.g. server restarted), return a dummy or null
     if (!room || !room.questions) {
@@ -19,7 +23,7 @@ async function getQuestion(roomCode) {
     console.log("QUESTION INDEXES BEFORE : " + quesIndexes)
 
     if (questionBatch.length == 0) {
-        questionBatch = await fetchQuestions(10)
+        questionBatch = await fetchQuestions(setting.BATCH_SIZE)
         quesIndexes = _.range(0, questionBatch.length)
         let questionId = questionBatch.map((ele) => { return ele.id })
         console.log("QUESTION IDs : ", questionId)
@@ -42,5 +46,30 @@ async function getQuestion(roomCode) {
 
     return currentQuestion
 }
+
+async function fetchQuestions(BATCH_SIZE) {
+    console.log("fetchQuestions invoked")
+    let questionSet = await downloadFile("questions/standard.json")
+    let randomIds = []
+    // console.log("QUESTION : " + JSON.stringify(questionSet[0]))
+
+    while (randomIds.length < BATCH_SIZE) {
+        const id = _.random(0, questionSet.length - 1)
+        if (!randomIds.includes(id)) randomIds.push(id)
+    }
+
+    console.log("RANDOM INDEXES : " + randomIds)
+
+    let questionBatch = randomIds.map(id => questionSet[id])
+    console.log("QUESTION BATCH : " + JSON.stringify(questionBatch))
+
+    return questionBatch
+
+}
+
+// async function main() {
+//     await getQuestionSet(10)
+// }
+// main()
 
 module.exports = { getQuestion }
