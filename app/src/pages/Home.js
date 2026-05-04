@@ -11,6 +11,7 @@ export default function Home() {
     if (!socket.connected) {
       socket.connect();
     }
+    sessionStorage.setItem('myUsername', username.trim());  // store per-tab for (you) identification
     navigate(path, { state: { username: username.trim() } });
   };
 

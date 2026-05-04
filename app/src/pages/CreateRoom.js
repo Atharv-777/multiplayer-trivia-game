@@ -36,7 +36,7 @@ export default function CreateRoom() {
 
     const onGameStarted = (data) => {
       console.log("STARTING THE GAME")
-      navigate("/game", { state: { username: data.username, roomCode: data.roomCode, currentQuestion: data.currentQuestion } });
+      navigate("/game", { state: { username: username, roomCode: data.roomCode, currentQuestion: data.currentQuestion } });
     };
 
     const onConnectError = () => {

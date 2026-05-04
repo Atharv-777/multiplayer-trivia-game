@@ -3,6 +3,8 @@ import React from "react";
 const MEDAL = ["🥇", "🥈", "🥉"];
 
 export default function GameEndScreen({ leaderboard = [], username }) {
+    // sessionStorage is per-tab — set at login, never confused across players
+    const myUsername = sessionStorage.getItem('myUsername') || username;
     return (
         <div className="page">
             <div className="card glass game-card">
@@ -16,7 +18,7 @@ export default function GameEndScreen({ leaderboard = [], username }) {
                 {/* Leaderboard list */}
                 <div className="leaderboard">
                     {leaderboard.map((player, index) => {
-                        const isYou = player.username === username;
+                        const isYou = player.username === myUsername;
                         const medal = MEDAL[index] ?? null;
 
                         return (

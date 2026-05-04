@@ -21,7 +21,7 @@ export default function WaitingRoom() {
 
     const onGameStarted = (data) => {
       console.log("REDIRECTING TO GAME")
-      navigate("/game", { state: { username: data.username, roomCode: data.roomCode, currentQuestion: data.currentQuestion } });
+      navigate("/game", { state: { username: username, roomCode: data.roomCode, currentQuestion: data.currentQuestion } });
     };
 
     socket.on("room:player_joined", onPlayerJoined);

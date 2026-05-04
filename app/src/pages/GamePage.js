@@ -25,6 +25,7 @@ export default function GamePage() {
     const [isGameComplete, setIsGameComplete] = useState(false);
     const [leaderboard, setLeaderboard] = useState([]);
     const [nextCountdown, setNextCountdown] = useState(NEXT_QUESTION_DELAY);
+    const [pointsEarned, setPointsEarned] = useState(null);
     const nextTimerRef = useRef(null);
 
     // Clear any running timer
@@ -107,6 +108,10 @@ export default function GamePage() {
             // Round is over — show the answer screen
             clearTimer();
             setIsGameComplete(data.isGameComplete || false);
+
+            // Show points earned this round
+            const myPoints = data.pointsThisRound?.[socket.id] ?? null;
+            setPointsEarned(myPoints);
 
             if (data.isGameComplete) {
                 // Game finished — store leaderboard and show end screen
@@ -251,6 +256,14 @@ export default function GamePage() {
                             <span className="answer-summary-label">Correct answer</span>
                             <span className="answer-summary-value text-correct">{correctAnswer}</span>
                         </div>
+                        {pointsEarned !== null && (
+                            <div className="answer-summary-row">
+                                <span className="answer-summary-label">Points earned</span>
+                                <span className={`answer-summary-value ${pointsEarned > 0 ? 'text-correct' : 'text-incorrect'}`}>
+                                    {pointsEarned > 0 ? `+${pointsEarned} pts` : '+0 pts'}
+                                </span>
+                            </div>
+                        )}
                     </div>
 
                     {/* Next question countdown */}
