@@ -1,6 +1,6 @@
 const { getRoom, setRoom, getSettings } = require("../store");
 // const { fetchQuestions } = require("./dbHelper");
-const { downloadFile } = require("./BucketUtils")
+const { downloadFile } = require("./bucketUtils")
 const _ = require("lodash")
 
 async function getQuestion(roomCode) {
@@ -42,6 +42,7 @@ async function getQuestion(roomCode) {
     room.currentRound.questionIndexes = quesIndexes || []
     room.currentRound.question = currentQuestion.question || ""
     room.currentRound.answer = currentQuestion.answer || ""
+    room.currentRound.questionStartTime = Date.now()  // for time-based scoring
     setRoom(roomCode, room)
 
     return currentQuestion

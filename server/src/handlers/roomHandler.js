@@ -1,6 +1,6 @@
 const _ = require("lodash")
 const { setRoom, getRoom, setSettings, getSettings } = require("../store")
-const { downloadFile } = require("../utils/BucketUtils")
+const { downloadFile } = require("../utils/bucketUtils")
 
 function generateRoomCode() {
     return _.toUpper(Math.random().toString(36).substring(2, 8))
