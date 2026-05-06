@@ -1,6 +1,7 @@
 const _ = require("lodash")
 const { setRoom, getRoom, setSettings, getSettings } = require("../store")
 const { downloadFile } = require("../utils/BucketUtils")
+const RedisUtils = require("../utils/redisUtils")
 
 function generateRoomCode() {
     return _.toUpper(Math.random().toString(36).substring(2, 8))
@@ -31,6 +32,7 @@ async function handleCreateRoom(io, socket, data) {
         }
         setRoom(roomCode, roomData)
         setSettings(roomCode, settings)
+        await RedisUtils.createEntry(`leaderboard::${roomCode}`, username, settings.LEADERBOARD_TTL_IN_SECONDS)
 
         socket.join(roomCode)
         socket.emit("room:created", {
@@ -45,7 +47,7 @@ async function handleCreateRoom(io, socket, data) {
     }
 }
 
-function handleJoinRoom(io, socket, data) {
+async function handleJoinRoom(io, socket, data) {
     console.log("handlerJoinRoom invoked")
     try {
         let username = data.username
@@ -67,6 +69,7 @@ function handleJoinRoom(io, socket, data) {
         })
 
         setRoom(roomCode, room)
+        await RedisUtils.addEntry(`leaderboard::${roomCode}`, username)
 
         socket.join(roomCode)
         socket.emit("room:joined", {

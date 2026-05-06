@@ -941,6 +941,22 @@ body::before {
   animation: cardIn 0.5s ease-out 0.3s both;
 }
 
+/* ============ Round Scoreboard ============ */
+.round-scoreboard {
+  margin-bottom: 24px;
+  animation: cardIn 0.4s ease-out 0.15s both;
+}
+
+.round-scoreboard-title {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
 /* ============ Responsive ============ */
 @media (max-width: 500px) {
   .card.glass {

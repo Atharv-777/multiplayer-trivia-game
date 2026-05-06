@@ -14,14 +14,43 @@ export default function GamePage() {
     const NEXT_QUESTION_DELAY = 5; // seconds to show answer screen
 
     const [question, setQuestion] = useState(currentQuestion);
+
+    // Play voiceover for the very first question (passed via location.state)
+    useEffect(() => {
+        if (currentQuestion?.audioUrl) playAudio(currentQuestion.audioUrl);
+        return () => stopAudio();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
     const [selectedOption, setSelectedOption] = useState(null);
     const [questionNumber, setQuestionNumber] = useState(1);
     const [timeLeft, setTimeLeft] = useState(ROUND_TIME);
     const [timerExpired, setTimerExpired] = useState(false);
     const timerRef = useRef(null);
+    const audioRef = useRef(null); // holds the current question's Audio instance
 
-    // Answer screen state
-    const [showAnswerScreen, setShowAnswerScreen] = useState(false);
+    // Helper: stop whatever audio is currently playing
+    const stopAudio = useCallback(() => {
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+            audioRef.current = null;
+        }
+    }, []);
+
+    // Helper: play a Firebase Storage MP3 URL
+    const playAudio = useCallback((url) => {
+        if (!url) return;
+        stopAudio();
+        const audio = new Audio(url);
+        audioRef.current = audio;
+        audio.play().catch((err) => {
+            // Browsers may block autoplay — log silently
+            console.warn("Audio playback blocked:", err);
+        });
+    }, [stopAudio]);
+
+    // Scoreboard screen state
+    const [showScoreboard, setShowScoreboard] = useState(false);
     const [isGameComplete, setIsGameComplete] = useState(false);
     const [leaderboard, setLeaderboard] = useState([]);
     const [nextCountdown, setNextCountdown] = useState(NEXT_QUESTION_DELAY);
@@ -44,7 +73,7 @@ export default function GamePage() {
 
     // Start/restart the countdown whenever a new question appears
     useEffect(() => {
-        if (!question || showAnswerScreen) return;
+        if (!question || showScoreboard) return;
 
         // Reset timer state
         setTimeLeft(ROUND_TIME);
@@ -64,7 +93,7 @@ export default function GamePage() {
         }, 1000);
 
         return () => clearTimer();
-    }, [question, showAnswerScreen, clearTimer]);
+    }, [question, showScoreboard, clearTimer]);
 
     // When timer expires, auto-submit empty answer so server counts us
     useEffect(() => {
@@ -94,26 +123,30 @@ export default function GamePage() {
         const onQuestion = (data) => {
             // New question arriving — reset everything
             const q = data.currentQuestion || data;
-            setShowAnswerScreen(false);
+            setShowScoreboard(false);
             clearNextTimer();
             setQuestion(q);
             setQuestionNumber(q.questionNumber || questionNumber + 1);
             setSelectedOption(null);
             setIsGameComplete(false);
+            setLeaderboard([]);
             setNextCountdown(NEXT_QUESTION_DELAY);
+            // Play the pre-generated voiceover MP3 from Firebase Storage
+            if (q.audioUrl) playAudio(q.audioUrl);
         };
 
         const onRoundEnd = (data) => {
-            // Round is over — show the answer screen
+            // Round is over — show the scoreboard; stop voiceover
             clearTimer();
+            stopAudio();
             setIsGameComplete(data.isGameComplete || false);
+            setLeaderboard(data.leaderboard || []);
 
             if (data.isGameComplete) {
-                // Game finished — store leaderboard and show end screen
-                setLeaderboard(data.leaderboard || []);
+                // Game finished — GameEndScreen will render
             } else {
-                // Still playing — show answer screen then countdown
-                setShowAnswerScreen(true);
+                // Still playing — show scoreboard then countdown to next question
+                setShowScoreboard(true);
                 setNextCountdown(NEXT_QUESTION_DELAY);
                 nextTimerRef.current = setInterval(() => {
                     setNextCountdown(prev => {
@@ -136,11 +169,12 @@ export default function GamePage() {
             socket.off("game:question", onQuestion);
             socket.off("game:roundEnd", onRoundEnd);
             clearNextTimer();
+            stopAudio(); // clean up audio on unmount
         };
-    }, [username, roomCode, navigate, questionNumber, clearTimer, clearNextTimer]);
+    }, [username, roomCode, navigate, questionNumber, clearTimer, clearNextTimer, playAudio, stopAudio]);
 
     const handleOptionClick = (option) => {
-        if (selectedOption || timerExpired || showAnswerScreen) return;
+        if (selectedOption || timerExpired || showScoreboard) return;
         setSelectedOption(option);
         socket.emit("game:submitAnswer", {
             roomCode,
@@ -154,22 +188,17 @@ export default function GamePage() {
 
     const getOptionClass = (option) => {
         let cls = "game-option";
-
-        if (!showAnswerScreen) {
-            // Still playing — just highlight selected
-            if (selectedOption === option) cls += " selected";
-            if ((selectedOption || timerExpired) && selectedOption !== option) cls += " disabled";
-        } else {
-            // Answer screen — reveal correct / incorrect
-            if (option === correctAnswer) cls += " correct";
-            else if (selectedOption === option) cls += " incorrect";
-            else cls += " disabled";
-        }
-
+        // Still playing — just highlight selected
+        if (selectedOption === option) cls += " selected";
+        if ((selectedOption || timerExpired) && selectedOption !== option) cls += " disabled";
         return cls;
     };
 
+    const MEDAL = ["🥇", "🥈", "🥉"];
+
     if (!username || !roomCode) return null;
+
+
 
     // ───────── Game End Screen ─────────
     if (isGameComplete) {
@@ -191,8 +220,8 @@ export default function GamePage() {
         );
     }
 
-    // ───────── Answer Screen ─────────
-    if (showAnswerScreen) {
+    // ───────── Scoreboard Screen ─────────
+    if (showScoreboard) {
         return (
             <div className="page">
                 <div className="card glass game-card">
@@ -209,47 +238,39 @@ export default function GamePage() {
                         </span>
                         <span className="answer-banner-text">
                             {!selectedOption
-                                ? "Time's up! You didn't answer"
+                                ? "Time's up!"
                                 : playerIsCorrect
-                                    ? 'Correct!'
+                                    ? `Correct! +${10} pts`
                                     : 'Wrong!'}
                         </span>
                     </div>
 
-                    {/* Question with correct answer highlighted */}
-                    <h2 className="game-question answer-screen-question">{question.question}</h2>
-
-                    <div className="game-options">
-                        {question.options.map((option, i) => (
-                            <div
-                                key={i}
-                                className={getOptionClass(option)}
-                            >
-                                <span className="option-letter">
-                                    {String.fromCharCode(65 + i)}
-                                </span>
-                                <span className="option-text">{option}</span>
-                                {option === correctAnswer && (
-                                    <span className="option-check">✓</span>
-                                )}
-                                {selectedOption === option && option !== correctAnswer && (
-                                    <span className="option-cross">✗</span>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Your answer summary */}
-                    <div className="answer-summary">
-                        <div className="answer-summary-row">
-                            <span className="answer-summary-label">Your answer</span>
-                            <span className={`answer-summary-value ${playerIsCorrect ? 'text-correct' : 'text-incorrect'}`}>
-                                {selectedOption || 'No answer'}
-                            </span>
-                        </div>
-                        <div className="answer-summary-row">
-                            <span className="answer-summary-label">Correct answer</span>
-                            <span className="answer-summary-value text-correct">{correctAnswer}</span>
+                    {/* Scoreboard */}
+                    <div className="round-scoreboard">
+                        <h3 className="round-scoreboard-title">📊 Scoreboard</h3>
+                        <div className="leaderboard">
+                            {leaderboard.map((player, index) => {
+                                const isYou = player.username === username;
+                                const medal = MEDAL[index] ?? null;
+                                return (
+                                    <div
+                                        key={player.username}
+                                        className={`leaderboard-row${index === 0 ? " leaderboard-row-winner" : ""}${isYou ? " leaderboard-row-you" : ""}`}
+                                        style={{ animationDelay: `${index * 0.08}s` }}
+                                    >
+                                        <span className="leaderboard-rank">
+                                            {medal ?? `#${index + 1}`}
+                                        </span>
+                                        <span className="leaderboard-name">
+                                            {player.username}
+                                            {isYou && <span className="leaderboard-you-tag"> (you)</span>}
+                                        </span>
+                                        <span className="leaderboard-score">
+                                            {player.score} pts
+                                        </span>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
 

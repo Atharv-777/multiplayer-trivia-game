@@ -6,10 +6,10 @@ function registerSocketHandler(io) {
     io.on("connection", (socket) => {
         handleConnection(socket)
         socket.on("room:create", async (data) => await handleCreateRoom(io, socket, data))
-        socket.on("room:join", (data) => handleJoinRoom(io, socket, data))
-        socket.on("game:start", (data) => handleStartGame(io, socket, data))
-        socket.on("game:submitAnswer", (data) => handleSubmitAnswer(io, socket, data))
-        socket.on("game:nextQuestion", (data) => handleNextQuestion(io, socket, data))
+        socket.on("room:join", async (data) => await handleJoinRoom(io, socket, data))
+        socket.on("game:start", async (data) => await handleStartGame(io, socket, data))
+        socket.on("game:submitAnswer", async (data) => await handleSubmitAnswer(io, socket, data))
+        socket.on("game:nextQuestion", async (data) => await handleNextQuestion(io, socket, data))
     })
 }
 
