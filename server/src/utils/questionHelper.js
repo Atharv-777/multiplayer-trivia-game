@@ -23,7 +23,7 @@ async function getQuestion(roomCode) {
     console.log("QUESTION INDEXES BEFORE : " + quesIndexes)
 
     if (questionBatch.length == 0) {
-        questionBatch = await fetchQuestions(setting.BATCH_SIZE)
+        questionBatch = await fetchQuestions(setting.GAMEPLAY.BATCH_SIZE)
         quesIndexes = _.range(0, questionBatch.length)
         let questionId = questionBatch.map((ele) => { return ele.id })
         console.log("QUESTION IDs : ", questionId)

@@ -21,7 +21,7 @@ export default function WaitingRoom() {
 
     const onGameStarted = (data) => {
       console.log("REDIRECTING TO GAME")
-      navigate("/game", { state: { username: username, roomCode: data.roomCode, currentQuestion: data.currentQuestion } });
+      navigate("/game", { state: { username: username, roomCode: data.roomCode, currentQuestion: data.currentQuestion, roundTime: data.roundTime } });
     };
 
     socket.on("room:player_joined", onPlayerJoined);
@@ -45,7 +45,7 @@ export default function WaitingRoom() {
 
         <div className="players-section">
           <h3 className="players-title">
-            Players ({players.length}/4)
+            Players joined : {players.length}
           </h3>
           <ul className="player-list">
             {players.map((p, i) => (

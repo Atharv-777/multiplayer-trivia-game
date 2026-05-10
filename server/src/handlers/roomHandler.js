@@ -32,7 +32,7 @@ async function handleCreateRoom(io, socket, data) {
         }
         setRoom(roomCode, roomData)
         setSettings(roomCode, settings)
-        await RedisUtils.createEntry(`leaderboard::${roomCode}`, username, settings.LEADERBOARD_TTL_IN_SECONDS)
+        await RedisUtils.createEntry(`leaderboard::${roomCode}`, username, settings.GAMEPLAY.LEADERBOARD_TTL_IN_SECONDS)
 
         socket.join(roomCode)
         socket.emit("room:created", {
@@ -59,7 +59,7 @@ async function handleJoinRoom(io, socket, data) {
             return socket.emit("error", { message: "Room not found" })
         if (room.status != "waiting")
             return socket.emit("error", { message: "Game already in progress" })
-        if (room.players.length >= setting.TOTAL_PLAYERS)
+        if (room.players.length >= setting.GAMEPLAY.TOTAL_PLAYERS)
             return socket.emit("error", { message: "Room is full" })
 
         room.players.push({

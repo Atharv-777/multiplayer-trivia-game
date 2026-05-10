@@ -93,7 +93,7 @@ export default function CreateRoom() {
 
             <div className="players-section">
               <h3 className="players-title">
-                Players ({players.length}/4)
+                Players joined : {players.length}
               </h3>
               <ul className="player-list">
                 {players.map((p, i) => (

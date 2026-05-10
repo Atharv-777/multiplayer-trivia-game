@@ -7,10 +7,10 @@ export default function GamePage() {
     console.log("GamePage invoked")
     const location = useLocation();
     const navigate = useNavigate();
-    const { username, roomCode, currentQuestion } = location.state || {};
+    const { username, roomCode, currentQuestion, roundTime: initialRoundTime } = location.state || {};
     console.log("CURRENT QUESTION : " + JSON.stringify(currentQuestion))
 
-    const ROUND_TIME = 15; // seconds
+    const [roundTime, setRoundTime] = useState(initialRoundTime || 15); // seconds — driven by backend
     const NEXT_QUESTION_DELAY = 5; // seconds to show answer screen
 
     const [question, setQuestion] = useState(currentQuestion);
@@ -23,7 +23,7 @@ export default function GamePage() {
     }, []);
     const [selectedOption, setSelectedOption] = useState(null);
     const [questionNumber, setQuestionNumber] = useState(1);
-    const [timeLeft, setTimeLeft] = useState(ROUND_TIME);
+    const [timeLeft, setTimeLeft] = useState(roundTime);
     const [timerExpired, setTimerExpired] = useState(false);
     const timerRef = useRef(null);
     const audioRef = useRef(null); // holds the current question's Audio instance
@@ -77,7 +77,7 @@ export default function GamePage() {
         if (!question || showScoreboard) return;
 
         // Reset timer state
-        setTimeLeft(ROUND_TIME);
+        setTimeLeft(roundTime);
         setTimerExpired(false);
         clearTimer();
 
@@ -94,7 +94,7 @@ export default function GamePage() {
         }, 1000);
 
         return () => clearTimer();
-    }, [question, showScoreboard, clearTimer]);
+    }, [question, showScoreboard, clearTimer, roundTime]);
 
     // When timer expires, auto-submit empty answer so server counts us
     useEffect(() => {
@@ -124,6 +124,7 @@ export default function GamePage() {
         const onQuestion = (data) => {
             // New question arriving — reset everything
             const q = data.currentQuestion || data;
+            if (data.roundTime) setRoundTime(data.roundTime);
             setShowScoreboard(false);
             clearNextTimer();
             setQuestion(q);
@@ -140,6 +141,7 @@ export default function GamePage() {
             // Round is over — show the scoreboard; stop voiceover
             clearTimer();
             stopAudio();
+            if (data.roundTime) setRoundTime(data.roundTime);
             setIsGameComplete(data.isGameComplete || false);
             setLeaderboard(data.leaderboard || []);
 
@@ -245,7 +247,7 @@ export default function GamePage() {
                             {!selectedOption
                                 ? "Time's up!"
                                 : playerIsCorrect
-                                    ? `Correct! +${10} pts`
+                                    ? `Correct!`
                                     : 'Wrong!'}
                         </span>
                     </div>
@@ -328,7 +330,7 @@ export default function GamePage() {
                     <div className="timer-bar-bg">
                         <div
                             className={`timer-bar-fill${timeLeft <= 5 ? ' timer-danger' : ''}`}
-                            style={{ width: `${(timeLeft / ROUND_TIME) * 100}%` }}
+                            style={{ width: `${(timeLeft / roundTime) * 100}%` }}
                         />
                     </div>
                     <span className={`timer-text${timeLeft <= 5 ? ' timer-text-danger' : ''}`}>
