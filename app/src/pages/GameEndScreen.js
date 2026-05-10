@@ -47,11 +47,14 @@ export default function GameEndScreen({ leaderboard = [], username }) {
                 </div>
 
                 {/* Winner callout */}
-                {leaderboard.length > 0 && (
-                    <div className="game-end-winner-callout">
-                        🎉 <strong>{leaderboard[0].username}</strong> wins!
-                    </div>
-                )}
+                {
+                    leaderboard.length > 0 && (
+                        <div className="game-end-winner-callout">
+                            🎉 <strong>{
+                                leaderboard[0].username
+                            }</strong> wins!
+                        </div>
+                    )}
             </div>
         </div>
     );

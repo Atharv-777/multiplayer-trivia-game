@@ -1,6 +1,7 @@
 const { getRoom, setRoom, getSettings } = require("../store");
 const { getQuestionSet, getQuestion } = require("../utils/questionHelper");
-const _ = require("lodash")
+const _ = require("lodash");
+const redisUtils = require("../utils/redisUtils");
 const ROUND_TIME_MS = 15000      // must match ROUND_TIME on the client (15s)
 const MAX_POINTS = 100           // max points per correct answer
 const MIN_SCORE_FACTOR = 0.5     // correct answer always gives at least 50 pts
@@ -27,7 +28,7 @@ async function handleStartGame(io, socket, data) {
 
 }
 
-function handleSubmitAnswer(io, socket, data) {
+async function handleSubmitAnswer(io, socket, data) {
     console.log("handlerSubmitAnswer invoked")
     let roomCode = data.roomCode
 
@@ -36,18 +37,19 @@ function handleSubmitAnswer(io, socket, data) {
     if (!room) return; // Prevent crash if server restarted and room doesn't exist
 
     let currentRound = room.currentRound
+    let questions = room.questions
     let playerAnswers = currentRound.playerAnswers
     let playerPoints = currentRound.playerPoints || {}   // separate from playerAnswers
     let questions = room.questions
     let isGameComplete = false
+    let currentPlayerDataIndex = _.findIndex(room.players, (currentPlayer) => { return currentPlayer && currentPlayer.socketId == socket.id })
+    let username = room.players[currentPlayerDataIndex].username
 
     playerAnswers[socket.id] = data.answer
     room.currentRound.playerAnswers = playerAnswers
 
     if (_.toLower(data.answer) == _.toLower(room.currentRound.answer)) {
-        let currentPlayerDataIndex = _.findIndex(room.players, (currentPlayer) => { return currentPlayer && currentPlayer.socketId == socket.id })
         if (currentPlayerDataIndex != -1) {
-            // Time-based scoring: faster correct answers earn more points
             const questionStartTime = room.currentRound.questionStartTime || Date.now()
             const timeElapsed = Date.now() - questionStartTime
             const timeFraction = Math.max(0, 1 - timeElapsed / ROUND_TIME_MS)
@@ -57,18 +59,28 @@ function handleSubmitAnswer(io, socket, data) {
             room.currentRound.playerPoints = playerPoints
             console.log(`${socket.id} answered correctly in ${timeElapsed}ms → +${pointsEarned} pts`)
         }
+        await redisUtils.incrementScore(`leaderboard::${roomCode}`, username, setting.POINTS_PER_QUESTION)
     }
     setRoom(roomCode, room)
 
     if (_.keys(playerAnswers).length == room.players.length) {
-        let leaderboard = []
+        //roundEnd logic(after every question)
         if (questions.length == 0) {
+            // gameEnd logic
             isGameComplete = true
             let playersList = room.players
-            rankList = _.orderBy(playersList, ["score"], ["desc"])
-            leaderboard = _.map(rankList, (ele) => { return { ...ele, rank: rankList.indexOf(ele) + 1 } })
-
+            // rankList = _.orderBy(playersList, ["score"], ["desc"])
+            // leaderboard = _.map(rankList, (ele) => { return { ...ele, rank: rankList.indexOf(ele) + 1 } })
         }
+        let leaderboard = await redisUtils.getAllEntries(`leaderboard::${roomCode}`, setting.TOP_N_PLAYERS)
+        console.log("LEADERBOARD DATA @handleSubmitAnswer : " + JSON.stringify(leaderboard))
+        leaderboard = leaderboard.map((ele, index) => {
+            return {
+                rank: index + 1,
+                username: ele.value,
+                score: ele.score
+            }
+        })
         room.status = "roundEnd"
         setRoom(roomCode, room)
         console.log("SCORES : ", room.players)
@@ -106,7 +118,6 @@ async function handleNextQuestion(io, socket, data) {
     console.log("CURRENT QUESTION @handleNextQuestion : " + JSON.stringify(currentQuestion))
 
     setRoom(roomCode, room)
-
     io.to(roomCode).emit("game:question", { currentQuestion })
 
 }
