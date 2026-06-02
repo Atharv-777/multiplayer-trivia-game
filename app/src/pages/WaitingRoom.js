@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useJest } from "../context/JestContext";
 import socket from "../socketConnection";
 
 export default function WaitingRoom() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { username, roomCode, players: initialPlayers } = location.state || {};
+  const { savedProfile } = useJest();
+  // location.state is primary; JestContext is the fallback
+  const username = location.state?.username || savedProfile?.username || "";
+  const { roomCode, players: initialPlayers } = location.state || {};
 
   const [players, setPlayers] = useState(initialPlayers || []);
 

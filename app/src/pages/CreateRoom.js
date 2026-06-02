@@ -1,12 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useJest } from "../context/JestContext";
 import socket from "../socketConnection";
 
 export default function CreateRoom() {
   console.log("CreateRoom invoked")
   const location = useLocation();
   const navigate = useNavigate();
-  const username = location.state?.username;
+  const { savedProfile } = useJest();
+  // location.state is primary (set by Home); JestContext is the fallback
+  const username = location.state?.username || savedProfile?.username || "";
+  const country = savedProfile?.country || "";
 
   const [roomCode, setRoomCode] = useState(null);
   const [players, setPlayers] = useState([]);
@@ -46,7 +50,8 @@ export default function CreateRoom() {
     const doCreate = () => {
       if (hasSentCreate.current) return;
       hasSentCreate.current = true;
-      socket.emit("room:create", { username });
+      // Pass country so the server can use it for future country leaderboards
+      socket.emit("room:create", { username, country });
     };
 
     socket.on("room:created", onRoomCreated);
@@ -69,7 +74,7 @@ export default function CreateRoom() {
       socket.off("error", onError);
       socket.off("connect_error", onConnectError);
     };
-  }, [username, navigate]);
+  }, [username, country, navigate]);
 
 
   const handleStartGame = () => {

@@ -4,6 +4,7 @@ const { Server } = require("socket.io")
 require("dotenv").config()
 
 const { registerSocketHandler } = require("./src/socket")
+const verifyPlayerRouter = require("./src/routes/UserRoutes")
 
 const PORT = process.env.SERVER_PORT
 const app = express()
@@ -13,6 +14,13 @@ const io = new Server(server, {
 })
 
 registerSocketHandler(io)
+
+// Body parser — needed for POST /api/verify-player
+app.use(express.json())
+
+
+// REST API routes
+app.use("/api", verifyPlayerRouter)
 
 app.get("/", (req, res) => {
     res.send({status : "OK"})

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useJest } from "../context/JestContext";
 import socket from "../socketConnection";
 import GameEndScreen from "./GameEndScreen";
 
@@ -7,7 +8,10 @@ export default function GamePage() {
     console.log("GamePage invoked")
     const location = useLocation();
     const navigate = useNavigate();
-    const { username, roomCode, currentQuestion, roundTime: initialRoundTime } = location.state || {};
+    const { savedProfile } = useJest();
+    const { roomCode, currentQuestion, roundTime: initialRoundTime } = location.state || {};
+    // location.state is primary; JestContext is the fallback
+    const username = location.state?.username || savedProfile?.username || "";
     console.log("CURRENT QUESTION : " + JSON.stringify(currentQuestion))
 
     const [roundTime, setRoundTime] = useState(initialRoundTime || 15); // seconds — driven by backend

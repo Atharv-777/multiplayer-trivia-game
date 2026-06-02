@@ -1,0 +1,239 @@
+/* ============ Login Card ============ */
+.login-card {
+  position: relative;
+  overflow: hidden;
+  max-width: 440px;
+}
+
+/* ============ Decorative Orbs ============ */
+.login-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(60px);
+  opacity: 0.35;
+}
+
+.login-orb-1 {
+  width: 220px;
+  height: 220px;
+  top: -80px;
+  right: -60px;
+  background: radial-gradient(circle, var(--accent-primary), transparent 70%);
+  animation: orbFloat1 8s ease-in-out infinite alternate;
+}
+
+.login-orb-2 {
+  width: 180px;
+  height: 180px;
+  bottom: -60px;
+  left: -50px;
+  background: radial-gradient(circle, var(--accent-green), transparent 70%);
+  animation: orbFloat2 10s ease-in-out infinite alternate;
+}
+
+@keyframes orbFloat1 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-20px, 15px) scale(1.15); }
+}
+
+@keyframes orbFloat2 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(15px, -20px) scale(1.1); }
+}
+
+/* ============ Avatar Preview ============ */
+.login-avatar-wrapper {
+  position: relative;
+  display: inline-flex;
+  margin-bottom: 18px;
+}
+
+.login-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.6rem;
+  color: var(--text-muted);
+  background: rgba(15, 23, 42, 0.8);
+  border: 2px solid rgba(99, 102, 241, 0.2);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 2px;
+}
+
+.login-avatar-active {
+  color: white;
+  background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+  border-color: transparent;
+  box-shadow: 0 0 30px var(--accent-glow);
+  animation: avatarPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes avatarPop {
+  0% { transform: scale(0.85); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.login-avatar-flag {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  font-size: 1.5rem;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  border: 2px solid var(--glass-border);
+  border-radius: 50%;
+  animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* ============ Form ============ */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  position: relative;
+  z-index: 1;
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.login-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+}
+
+.login-label-icon {
+  font-size: 1rem;
+}
+
+/* ============ Select Styling ============ */
+.login-select-wrapper {
+  position: relative;
+}
+
+.login-select {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  padding-right: 42px;
+}
+
+.login-select-chevron {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-70%);
+  color: var(--text-muted);
+  font-size: 1rem;
+  pointer-events: none;
+  transition: var(--transition);
+}
+
+.login-select:focus ~ .login-select-chevron {
+  color: var(--accent-primary);
+}
+
+/* ============ Submit Button ============ */
+.login-btn {
+  margin-top: 8px;
+  padding: 16px 28px;
+  font-size: 1.05rem;
+  position: relative;
+  z-index: 1;
+}
+
+.login-btn-ready {
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 4px 20px var(--accent-glow); }
+  50% { box-shadow: 0 4px 32px var(--accent-glow), 0 0 60px rgba(99, 102, 241, 0.15); }
+}
+
+.login-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+/* ============ Guest Button ============ */
+.login-guest-btn {
+  margin-top: 4px;
+  position: relative;
+  z-index: 1;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.login-guest-btn:hover:not(:disabled) {
+  color: var(--text-secondary);
+  transform: none;
+}
+
+.login-guest-btn::before {
+  content: "or";
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  opacity: 0.5;
+}
+
+/* ============ Footer ============ */
+.login-footer {
+  margin-top: 24px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  position: relative;
+  z-index: 1;
+}
+
+.login-footer::before {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
+  margin: 0 auto 12px;
+}
+
+/* ============ Responsive ============ */
+@media (max-width: 500px) {
+  .login-card {
+    padding: 32px 24px;
+  }
+
+  .login-avatar {
+    width: 64px;
+    height: 64px;
+    font-size: 1.3rem;
+  }
+
+  .login-avatar-flag {
+    width: 28px;
+    height: 28px;
+    font-size: 1.2rem;
+  }
+}

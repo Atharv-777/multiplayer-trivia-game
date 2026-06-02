@@ -1,10 +1,27 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { getPlayerData, setPlayerData, flushPlayerData } from "../services/jestService";
 
 const MEDAL = ["🥇", "🥈", "🥉"];
 
 export default function GameEndScreen({ leaderboard = [], username }) {
     // sessionStorage is per-tab — set at login, never confused across players
     const myUsername = sessionStorage.getItem('myUsername') || username;
+
+    // Persist this game's result to the Jest data store once, on mount
+    useEffect(() => {
+        const myEntry = leaderboard.find((p) => p.username === myUsername);
+        if (!myEntry) return;
+
+        const lastScore = myEntry.score;
+        const gamesPlayed = (getPlayerData("gamesPlayed") || 0) + 1;
+
+        setPlayerData({ lastScore, gamesPlayed });
+        flushPlayerData().catch(() => {});
+
+        console.log(`[GameEndScreen] Persisted to Jest — lastScore: ${lastScore}, gamesPlayed: ${gamesPlayed}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     return (
         <div className="page">
             <div className="card glass game-card">
