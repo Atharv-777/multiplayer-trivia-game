@@ -11,9 +11,10 @@ async function handleCreateRoom(io, socket, data) {
     console.log("handleCreateRoom invoked")
     try {
         const roomCode = generateRoomCode()
-        let settings = await downloadFile("settings.json")
         let username = data.username
+        let settings = await downloadFile("settings.json")
 
+        console.log("SETTINGS : " + JSON.stringify(settings))
         let roomData = {
             host: socket.id,
             players: [{
@@ -43,7 +44,8 @@ async function handleCreateRoom(io, socket, data) {
         console.log(`Room ${roomCode} created by ${username}`)
 
     } catch (err) {
-        console.log("Error while created room: ", JSON.stringify(err))
+        console.log("Error while created room: ")
+        console.log(err)
     }
 }
 

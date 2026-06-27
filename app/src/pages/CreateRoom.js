@@ -11,6 +11,7 @@ export default function CreateRoom() {
   // location.state is primary (set by Home); JestContext is the fallback
   const username = location.state?.username || savedProfile?.username || "";
   const country = savedProfile?.country || "";
+  const appName = location.state?.appName || ""
 
   const [roomCode, setRoomCode] = useState(null);
   const [players, setPlayers] = useState([]);
@@ -51,7 +52,7 @@ export default function CreateRoom() {
       if (hasSentCreate.current) return;
       hasSentCreate.current = true;
       // Pass country so the server can use it for future country leaderboards
-      socket.emit("room:create", { username, country });
+      socket.emit("room:create", { username, country, appName });
     };
 
     socket.on("room:created", onRoomCreated);

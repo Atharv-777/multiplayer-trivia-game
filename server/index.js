@@ -1,6 +1,7 @@
 const express = require("express")
 const { createServer } = require("node:http")
 const { Server } = require("socket.io")
+const cors = require("cors")
 require("dotenv").config()
 
 const { registerSocketHandler } = require("./src/socket")
@@ -15,6 +16,9 @@ const io = new Server(server, {
 
 registerSocketHandler(io)
 
+// CORS — allow requests from the React dev server
+app.use(cors({ origin: "*" }))
+
 // Body parser — needed for POST /api/verify-player
 app.use(express.json())
 
@@ -23,7 +27,9 @@ app.use(express.json())
 app.use("/api", verifyPlayerRouter)
 
 app.get("/", (req, res) => {
-    res.send({status : "OK"})
+    console.log("REQ")
+    console.log(req)
+    res.send({ status: "OK" })
 })
 
 server.listen(PORT, "0.0.0.0", () => {

@@ -40,8 +40,10 @@ export function getPlayer() {
  */
 export async function getPlayerSigned() {
   if (!isJestSDKAvailable()) {
+    console.log("JEST SDK not available")
     return { player: getPlayer(), playerSigned: "" };
   }
+  console.log("JEST SDK available")
   return sdk().getPlayerSigned();
 }
 
@@ -103,7 +105,7 @@ export function getRoomsUsed() {
 export async function incrementRoomsUsed() {
   const current = getRoomsUsed();
   setPlayerData({ rooms_used: current + 1 });
-  return flushPlayerData().catch(() => {});
+  return flushPlayerData().catch(() => { });
 }
 
 /**
@@ -137,5 +139,5 @@ export async function incrementSPRoundsToday() {
     sp_rounds_today: currentCount + 1,
     sp_rounds_reset_date: todayUTC,
   });
-  return flushPlayerData().catch(() => {});
+  return flushPlayerData().catch(() => { });
 }

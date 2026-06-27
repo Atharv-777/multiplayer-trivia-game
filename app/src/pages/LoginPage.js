@@ -68,15 +68,21 @@ export default function LoginPage() {
 
       // Register user in Firebase via server
       const { playerSigned } = await getPlayerSigned();
-      await fetch(`${SERVER_URL}/api/register`, {
+      console.log("PLAYER SIGNED TOKEN : ", playerSigned)
+      const response = await fetch(`${SERVER_URL}/api/register`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
+        },
         body: JSON.stringify({
           playerSignedToken: playerSigned,
           username: username.trim(),
           country,
         }),
       });
+
+      const loginData = await response.json();
 
       navigate("/home");
     } catch (err) {
