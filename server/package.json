@@ -10,6 +10,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1075.0",
+    "@aws-sdk/lib-dynamodb": "^3.1075.0",
     "@supabase/supabase-js": "^2.99.3",
     "axios": "^1.18.1",
     "cors": "^2.8.6",

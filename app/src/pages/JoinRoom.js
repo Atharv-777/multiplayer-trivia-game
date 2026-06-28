@@ -7,7 +7,6 @@ export default function JoinRoom() {
   const location = useLocation();
   const navigate = useNavigate();
   const username = location.state?.username;
-  const appName = location.state?.appName || ""
 
   const [roomCode, setRoomCode] = useState("");
   const [error, setError] = useState(null);

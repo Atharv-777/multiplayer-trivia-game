@@ -11,5 +11,4 @@ curl -X POST https://jest.com/api/management/games/84b3c6cd-006d-4ead-95a8-3764b
   -H "x-build-version: $VERSION" \
   -H "x-game-upload-token: 9b3989b0-7933-4ab4-8fbc-877c370e5954" \
   -F "file=@game-build.zip" \
-  -F "isActive=true" \
-  -F "notificationEmail=atharvbidwe11@gmail.com"
+  -F "isActive=true" 

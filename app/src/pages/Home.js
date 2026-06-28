@@ -1,19 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useJest } from "../context/JestContext";
 import socket from "../socketConnection";
 
 export default function Home() {
   const navigate = useNavigate();
-  const { savedProfile, clearProfile } = useJest();
+  const { savedProfile } = useJest();
+  console.log("SAVE PROFILE : " + JSON.stringify(savedProfile))
   const username = savedProfile?.username || "";
-
-  // Guard: if no profile is saved send back to login
-  useEffect(() => {
-    if (!savedProfile?.username) {
-      navigate("/", { replace: true });
-    }
-  }, [savedProfile, navigate]);
+  console.log("USERNAME @Home.js: " + username)
 
   const [showMultiOptions, setShowMultiOptions] = useState(false);
 
@@ -23,15 +18,13 @@ export default function Home() {
     navigate(path, { state: { username } });
   };
 
-  if (!username) return null;
-
   return (
     <div className="page">
       <div className="card glass">
         <div className="logo-icon">🧠</div>
         <h1 className="title">Multi Trivia</h1>
         <p className="subtitle">
-          Welcome back, <strong>{username}</strong> 👋
+          Welcome, <strong>{username}</strong> 👋
         </p>
         <p className="subtitle" style={{ marginTop: 0, opacity: 0.7, fontSize: "0.9rem" }}>
           Choose your game mode
@@ -90,16 +83,7 @@ export default function Home() {
             </button>
           </div>
         )}
-        {/* Sign out */}
-        <button
-          className="btn btn-ghost"
-          onClick={clearProfile}
-          style={{ marginTop: "1rem", fontSize: "0.8rem", opacity: 0.6 }}
-        >
-          🚪 Sign Out
-        </button>
       </div>
     </div>
   );
 }
-

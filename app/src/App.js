@@ -7,7 +7,6 @@ import WaitingRoom from "./pages/WaitingRoom";
 import "./App.css";
 import GamePage from "./pages/GamePage";
 import GameEndScreen from "./pages/GameEndScreen";
-import LoginPage from "./pages/LoginPage";
 import { JestProvider } from "./context/JestContext";
 
 function App() {
@@ -15,8 +14,7 @@ function App() {
     <JestProvider>
       <HashRouter>
         <Routes>
-          <Route path="/" element={<LoginPage />} />
-          <Route path="/home" element={<Home />} />
+          <Route path="/" element={<Home />} />
           <Route path="/create" element={<CreateRoom />} />
           <Route path="/join" element={<JoinRoom />} />
           <Route path="/waiting" element={<WaitingRoom />} />

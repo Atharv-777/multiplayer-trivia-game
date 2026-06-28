@@ -5,19 +5,20 @@ import {
   getPlayerData,
   setPlayerData,
   flushPlayerData,
-  loginPlayer,
   isJestSDKAvailable,
+  loginPlayer,
+  getPlayerSigned,
 } from "../services/jestService";
 import SplashScreen from "../components/SplashScreen";
+import axios from "axios"
 
 /**
  * Shape exposed by the context:
- *  - player      : { playerId, registered } | null
- *  - sdkReady    : boolean
- *  - sdkAvailable: boolean  (false when running outside Jest platform)
- *  - savedProfile: { username, country } | null  (loaded from JestSDK.data)
- *  - login       : () => Promise<void>
- *  - saveProfile : (username, country) => void
+ *  - player       : { playerId, registered } | null
+ *  - sdkReady     : boolean
+ *  - sdkAvailable : boolean  (false when running outside Jest platform)
+ *  - savedProfile : { username } — always populated (auto-generated if needed)
+ *  - saveProfile  : (username) => void
  */
 const JestContext = createContext(null);
 
@@ -43,24 +44,53 @@ export function JestProvider({ children }) {
 
         if (cancelled) return;
 
-        const p = getPlayer();
-        setPlayer(p);
+        const player = getPlayer();
+        console.log("[JestContext] getPlayer() →", JSON.stringify(player));
+        // console.log("[JestContext] SDK available?", isJestSDKAvailable());
 
-        // If registered, try to load saved profile from Jest data store
-        if (p.registered) {
-          const username = getPlayerData("username");
-          const country = getPlayerData("country");
-          if (username) {
-            setSavedProfile({ username, country: country || "" });
-            // Also sync to sessionStorage for socket identification
-            sessionStorage.setItem("myUsername", username);
-            if (country) sessionStorage.setItem("myCountry", country);
+        if (!player.registered)
+          await loginPlayer()
+        const updatedPlayerSignedData = await getPlayerSigned()
+        console.log("PLAYER DATA WITH SIGNED TOKEN : ", updatedPlayerSignedData)
+        const updatedPlayer = updatedPlayerSignedData.player
+        const apiPath = `${process.env.REACT_APP_SERVER_URL}/api/register-user`
+        await axios.post(apiPath, updatedPlayer, {
+          headers: {
+            Authorization: updatedPlayerSignedData.playerSigned
           }
+        })
+        console.log("UPDATED PLAYER DATA : " + JSON.stringify(updatedPlayer))
+
+        setPlayer(updatedPlayer);
+        // Try to load saved profile from Jest data store
+        const savedUsername = updatedPlayer.registered ? getPlayerData("username") : null;
+
+        let username;
+
+        if (savedUsername) {
+          // Verified user with a previously saved username
+          username = savedUsername;
+        } else if (player.registered) {
+          // Verified user but no username saved yet — generate from playerId
+          const suffix = (player.playerId || "").slice(-4) || Math.floor(Math.random() * 9000 + 1000);
+          username = `Player_${suffix}`;
+          // Persist the auto-generated name so they keep it next time
+          setPlayerData({ username });
+          flushPlayerData().catch(() => { });
+        } else {
+          // Guest / unverified — ephemeral name
+          username = `Guest_${Math.floor(Math.random() * 9000) + 1000}`;
         }
+
+        setSavedProfile({ username });
+        sessionStorage.setItem("myUsername", username);
       } catch (err) {
         console.error("[JestContext] SDK init failed:", err);
         // Fallback: treat as guest
+        const fallbackName = `Guest_${Math.floor(Math.random() * 9000) + 1000}`;
         setPlayer({ playerId: `fallback_${Date.now()}`, registered: false });
+        setSavedProfile({ username: fallbackName });
+        sessionStorage.setItem("myUsername", fallbackName);
       } finally {
         if (!cancelled) setSdkReady(true);
       }
@@ -70,30 +100,12 @@ export function JestProvider({ children }) {
     return () => { cancelled = true; };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Trigger Jest platform login (SMS/RCS popup)
-  const login = useCallback(async () => {
-    await loginPlayer();
-    // After login flow completes, re-read player state
-    const p = getPlayer();
-    setPlayer(p);
-  }, []);
-
   // Persist profile to JestSDK data store + sessionStorage
-  const saveProfile = useCallback((username, country) => {
-    setPlayerData({ username, country });
+  const saveProfile = useCallback((username) => {
+    setPlayerData({ username });
     flushPlayerData().catch(() => { });
-    setSavedProfile({ username, country });
+    setSavedProfile({ username });
     sessionStorage.setItem("myUsername", username);
-    sessionStorage.setItem("myCountry", country);
-  }, []);
-
-  // Clear the profile — wipes Jest data store, sessionStorage, and context state
-  const clearProfile = useCallback(() => {
-    setPlayerData({ username: null, country: null, lastScore: null, gamesPlayed: null, rooms_used: null, sp_rounds_today: null, sp_rounds_reset_date: null });
-    flushPlayerData().catch(() => {});
-    sessionStorage.removeItem("myUsername");
-    sessionStorage.removeItem("myCountry");
-    setSavedProfile(null);
   }, []);
 
   // Show splash screen while SDK is booting
@@ -102,7 +114,7 @@ export function JestProvider({ children }) {
   }
 
   return (
-    <JestContext.Provider value={{ player, sdkReady, sdkAvailable, savedProfile, login, saveProfile, clearProfile }}>
+    <JestContext.Provider value={{ player, sdkReady, sdkAvailable, savedProfile, saveProfile }}>
       {children}
     </JestContext.Provider>
   );
