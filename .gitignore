@@ -9,3 +9,6 @@ content/
 server/multi-trivia-game-firebase-adminsdk-fbsvc-6ea7632ad7.json
 content/multi-trivia-game-firebase-adminsdk-fbsvc-6ea7632ad7.json
 documentation/
+.DS_Store
+mockups/
+test/

@@ -11,6 +11,7 @@ import {
 } from "../services/jestService";
 import SplashScreen from "../components/SplashScreen";
 import axios from "axios"
+import API from "../services/apiEndpoints";
 
 /**
  * Shape exposed by the context:
@@ -53,8 +54,7 @@ export function JestProvider({ children }) {
         const updatedPlayerSignedData = await getPlayerSigned()
         console.log("PLAYER DATA WITH SIGNED TOKEN : ", updatedPlayerSignedData)
         const updatedPlayer = updatedPlayerSignedData.player
-        const apiPath = `${process.env.REACT_APP_SERVER_URL}/api/register-user`
-        await axios.post(apiPath, updatedPlayer, {
+        await axios.post(API.USER.REGISTER, updatedPlayer, {
           headers: {
             Authorization: updatedPlayerSignedData.playerSigned
           }
@@ -75,14 +75,14 @@ export function JestProvider({ children }) {
           const suffix = (player.playerId || "").slice(-4) || Math.floor(Math.random() * 9000 + 1000);
           username = `Player_${suffix}`;
           // Persist the auto-generated name so they keep it next time
-          setPlayerData({ username });
+          // setPlayerData({ username });
           flushPlayerData().catch(() => { });
         } else {
           // Guest / unverified — ephemeral name
           username = `Guest_${Math.floor(Math.random() * 9000) + 1000}`;
         }
 
-        setSavedProfile({ username });
+        // setSavedProfile({ username });
         sessionStorage.setItem("myUsername", username);
       } catch (err) {
         console.error("[JestContext] SDK init failed:", err);
@@ -102,7 +102,7 @@ export function JestProvider({ children }) {
 
   // Persist profile to JestSDK data store + sessionStorage
   const saveProfile = useCallback((username) => {
-    setPlayerData({ username });
+    // setPlayerData({ username });
     flushPlayerData().catch(() => { });
     setSavedProfile({ username });
     sessionStorage.setItem("myUsername", username);

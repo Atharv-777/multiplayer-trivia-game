@@ -1,10 +1,29 @@
 const _ = require("lodash")
 const { setRoom, getRoom, setSettings, getSettings } = require("../store")
-const { downloadFile } = require("../utils/bucketUtils")
-const RedisUtils = require("../utils/redisUtils")
+const { downloadFile } = require("../common/BucketUtils")
+const RedisUtils = require("../common/redisUtils")
+const { Constants } = require("../Constants")
+
+let connectedPlayers = new Map()
 
 function generateRoomCode() {
     return _.toUpper(Math.random().toString(36).substring(2, 8))
+}
+
+function handleConnection(socket) {
+    console.log("handlerConnection invoked")
+    connectedPlayers.set(socket.id, {
+        socketId: socket.id,
+    })
+
+    socket.emit("connected", { message: "Connected to server", socketId: socket.id })
+    console.log(`Player ${socket.id} successfully connected.`)
+}
+
+function handleDisconnect(io, socket) {
+    console.log("handleDisconnect invoked")
+    connectedPlayers.delete(socket.id)
+    console.log(`Player ${socket.id} disconnected.`)
 }
 
 async function handleCreateRoom(io, socket, data) {
@@ -12,7 +31,7 @@ async function handleCreateRoom(io, socket, data) {
     try {
         const roomCode = generateRoomCode()
         let username = data.username
-        let settings = await downloadFile("settings.json")
+        let settings = await downloadFile(Constants.FILES.SETTINGS)
 
         console.log("SETTINGS : " + JSON.stringify(settings))
         let roomData = {
@@ -33,7 +52,7 @@ async function handleCreateRoom(io, socket, data) {
         }
         setRoom(roomCode, roomData)
         setSettings(roomCode, settings)
-        await RedisUtils.createEntry(`leaderboard::${roomCode}`, username, settings.GAMEPLAY.LEADERBOARD_TTL_IN_SECONDS)
+        await new RedisUtils.createEntry(`leaderboard::${roomCode}`, username, settings.GAMEPLAY.LEADERBOARD_TTL_IN_SECONDS)
 
         socket.join(roomCode)
         socket.emit("room:created", {
@@ -92,4 +111,4 @@ async function handleJoinRoom(io, socket, data) {
 
 }
 
-module.exports = { handleCreateRoom, handleJoinRoom }
+module.exports = { handleConnection, handleDisconnect, handleCreateRoom, handleJoinRoom }

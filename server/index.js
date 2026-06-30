@@ -5,7 +5,7 @@ const cors = require("cors")
 require("dotenv").config()
 
 const { registerSocketHandler } = require("./src/socket")
-const verifyPlayerRouter = require("./src/routes/UserRoutes")
+const router = require("./src/routes/Router")
 
 const PORT = process.env.SERVER_PORT
 const app = express()
@@ -24,7 +24,7 @@ app.use(express.json())
 
 
 // REST API routes
-app.use("/api", verifyPlayerRouter)
+app.use("/api", router)
 
 app.get("/", (req, res) => {
     console.log("REQ")

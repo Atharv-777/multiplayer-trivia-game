@@ -1,6 +1,5 @@
-const { handleConnection } = require("./handlers/connectionHandler")
-const { handleStartGame, handleSubmitAnswer, handleNextQuestion } = require("./handlers/gameHandler")
-const { handleCreateRoom, handleJoinRoom } = require("./handlers/roomHandler")
+const { handleStartGame, handleSubmitAnswer, handleNextQuestion } = require("./handlers/GameHandler")
+const { handleConnection, handleCreateRoom, handleJoinRoom } = require("./handlers/roomHandler")
 
 function registerSocketHandler(io) {
     io.on("connection", (socket) => {

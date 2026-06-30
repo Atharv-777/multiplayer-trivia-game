@@ -51,4 +51,4 @@ class RedisUtils {
 }
 
 // Singleton — created once when the module is first required
-module.exports = new RedisUtils()
+module.exports = RedisUtils

@@ -1,7 +1,9 @@
 const { getRoom, setRoom, getSettings } = require("../store");
-const { getQuestionSet, getQuestion } = require("../utils/questionHelper");
+const { getQuestionForRoom, getQuestion } = require("../common/QuestionHelper");
 const _ = require("lodash");
-const redisUtils = require("../utils/redisUtils");
+const redisUtils = require("../common/redisUtils");
+const { Constants } = require("../Constants");
+const { checkAnswer, addScore } = require("../common/GameHelper");
 
 async function handleStartGame(io, socket, data) {
     console.log("handleStartGame invoked")
@@ -18,7 +20,7 @@ async function handleStartGame(io, socket, data) {
         }
     }
 
-    let currentQuestion = await getQuestion(roomCode)
+    let currentQuestion = await getQuestionForRoom(roomCode)
     console.log("CURRENT QUESTION : " + JSON.stringify(currentQuestion))
 
     io.to(roomCode).emit("game:started", { username, roomCode, currentQuestion })
@@ -115,11 +117,47 @@ async function handleNextQuestion(io, socket, data) {
         room.currentRound.playerPoints = {}  // reset points for next round
     }
 
-    let currentQuestion = await getQuestion(roomCode)
+    let currentQuestion = await getQuestionForRoom(roomCode)
     console.log("CURRENT QUESTION @handleNextQuestion : " + JSON.stringify(currentQuestion))
 
     setRoom(roomCode, room)
     io.to(roomCode).emit("game:question", { currentQuestion })
 
 }
-module.exports = { handleStartGame, handleSubmitAnswer, handleNextQuestion }
+
+async function startGameHandler(req, res, context) {
+    console.info("startGameHandler invoked")
+    try {
+        let request = req.body
+        let playerData = request.playerData || {};
+        let userData = _.get(context, Constants.STRINGS.USER_DATA)
+        let question = await getQuestion(context)
+        _.set(userData, Constants.STRINGS.LAST_QUESTION, question)
+        return res.status(200).json({ question: question, success: true })
+    } catch (err) {
+        console.error("Error @startGameHandler : ")
+        console.error(err)
+        return res.status(500).json({ success: false, error: "Internal server error" })
+    }
+}
+
+async function submitAnswerHandler(req, res, context) {
+    console.info("submitAnswerHandler invoked")
+    try {
+        let request = req.body
+        let answer = request.answer
+        let userData = _.get(context, Constants.STRINGS.USER_DATA)
+
+        let isAnswerCorrect = checkAnswer(context, answer)
+        if (isAnswerCorrect) addScore(context)
+        let question = getQuestion(context)
+        _.set(userData, Constants.STRINGS.LAST_QUESTION, question)
+
+        return res.status(200).json({ isCorrect: isAnswerCorrect, question: question })
+    } catch (err) {
+        console.error("Error @submitAnswerHandler : ")
+        console.error(err)
+        return res.status(500).json({ success: false, error: "Internal server error" })
+    }
+}
+module.exports = { handleStartGame, handleSubmitAnswer, handleNextQuestion, startGameHandler, submitAnswerHandler }

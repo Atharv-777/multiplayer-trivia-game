@@ -1,0 +1,32 @@
+[
+    {
+        "name": "user/register-user",
+        "input": {
+            "playerData" : {}
+        },
+        "output": {
+            "success": true,
+            "playerData": {}
+        }
+    },
+    {
+        "name": "game/start-game",
+        "input": {
+            "playerData": {}
+        },
+        "output": {
+            "question": {}
+        }
+    },
+    {
+        "name": "game/submit-answer",
+        "input": {
+            "playerData": {},
+            "answer": ""
+        },
+        "output": {
+            "isCorrect": true,
+            "question": {}
+        }
+    }
+]

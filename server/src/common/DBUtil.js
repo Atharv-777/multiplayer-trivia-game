@@ -1,6 +1,6 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, PutCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
-import _ from "lodash"
+const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
+const { DynamoDBDocumentClient, PutCommand, GetCommand } = require("@aws-sdk/lib-dynamodb");
+const _ = require("lodash")
 
 const client = new DynamoDBClient({
     region: process.env.AWS_REGION || "ap-south-1",
@@ -9,9 +9,16 @@ const client = new DynamoDBClient({
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     }
 })
-const docClient = DynamoDBDocumentClient.from(client)
+const translateConfig = {
+    marshallOptions: {
+        convertEmptyValues: false,
+        removeUndefinedValues: false,
+        convertClassInstanceToMap: true
+    }
+}
+const docClient = DynamoDBDocumentClient.from(client, translateConfig)
 
-export async function getData(tableName, key) {
+async function getData(tableName, key) {
     try {
         const command = new GetCommand({
             TableName: tableName,
@@ -26,7 +33,7 @@ export async function getData(tableName, key) {
     }
 }
 
-export async function saveData(tableName, data) {
+async function saveData(tableName, data) {
     try {
         if (!_.has(data, "createdAt")) _.set(data, "createdAt", new Date().toISOString())
         _.set(data, "updatedAt", new Date().toISOString())
@@ -45,4 +52,4 @@ export async function saveData(tableName, data) {
     }
 }
 
-// module.exports = { getData, saveData }
+module.exports = { getData, saveData }
