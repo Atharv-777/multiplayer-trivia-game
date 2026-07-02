@@ -12,8 +12,13 @@ const API = {
     // ── User Routes (mounted at /api/user on the server) ──
     USER: {
         REGISTER: `${SERVER_URL}/api/user/register-user`,
+        UPDATE_SUBSCRIPTION: `${SERVER_URL}/api/user/update-subscription`,
         // GET_QUESTION: `${SERVER_URL}/api/user/get-question`,
     },
+    GAME: {
+        START_GAME: `${SERVER_URL}/api/game/start-game`,
+        SUBMIT_ANSWER: `${SERVER_URL}/api/game/submit-answer`,
+    }
 
     // ── Admin Routes (mounted at /api/admin on the server) — future ──
     // ADMIN: {

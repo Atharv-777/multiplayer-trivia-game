@@ -1,5 +1,5 @@
 const _ = require("lodash")
-const { setRoom, getRoom, setSettings, getSettings } = require("../store")
+const { setRoom, getRoom, setSettings, getSettings } = require("../Store")
 const { downloadFile } = require("../common/BucketUtils")
 const RedisUtils = require("../common/redisUtils")
 const { Constants } = require("../Constants")

@@ -59,6 +59,14 @@ export async function loginPlayer() {
   return sdk().login();
 }
 
+export function checkSubscription() {
+  return sdk().payments.getSubscriptions()
+}
+
+export function buySubscription(subscriptionSku) {
+  return sdk().payments.beginSubscription({ subscriptionSku })
+}
+
 /** Read a single key from the per-player data store. */
 export function getPlayerData(key) {
   if (!isJestSDKAvailable()) return undefined;

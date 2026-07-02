@@ -9,7 +9,8 @@ export default function GamePage() {
     const location = useLocation();
     const navigate = useNavigate();
     const { savedProfile } = useJest();
-    const { roomCode, currentQuestion, roundTime: initialRoundTime } = location.state || {};
+    const { roomCode, currentQuestion, roundTime: initialRoundTime, mode } = location.state || {};
+    const isSinglePlayer = mode === "single-player";
     // location.state is primary; JestContext is the fallback
     const username = location.state?.username || savedProfile?.username || "";
     console.log("CURRENT QUESTION : " + JSON.stringify(currentQuestion))
@@ -118,12 +119,15 @@ export default function GamePage() {
     }, [selectedOption, clearTimer]);
 
     useEffect(() => {
-        console.log(`USERNAME : ${username} || ROOM CODE : ${roomCode}`)
-        if (!username || !roomCode) {
+        console.log(`USERNAME : ${username} || ROOM CODE : ${roomCode} || MODE : ${mode}`)
+        if (!username || (!isSinglePlayer && !roomCode)) {
             console.log("USER NAME || ROOM CODE not found")
             navigate("/");
             return;
         }
+
+        // Single-player mode doesn't use Socket.IO — skip listeners
+        if (isSinglePlayer) return;
 
         const onQuestion = (data) => {
             // New question arriving — reset everything
@@ -207,7 +211,7 @@ export default function GamePage() {
 
     const MEDAL = ["🥇", "🥈", "🥉"];
 
-    if (!username || !roomCode) return null;
+    if (!username || (!isSinglePlayer && !roomCode)) return null;
 
 
 

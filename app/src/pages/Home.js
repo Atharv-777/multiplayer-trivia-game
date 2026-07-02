@@ -2,13 +2,19 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useJest } from "../context/JestContext";
 import socket from "../socketConnection";
+import { buySubscription, checkSubscription, getPlayerSigned } from "../services/jestService";
+import API from "../services/apiEndpoints";
+import axios from "axios";
 
 export default function Home() {
   const navigate = useNavigate();
-  const { savedProfile } = useJest();
+  const { savedProfile, subscriptions, setSubscriptions } = useJest();
   console.log("SAVE PROFILE : " + JSON.stringify(savedProfile))
   const username = savedProfile?.username || "";
   console.log("USERNAME @Home.js: " + username)
+  const activeSubscriptionSku = "MULTI_TRIVIA_PLUS";
+  const premiumPlan = subscriptions?.find(sub => sub.sku === activeSubscriptionSku);
+  const isPremiumSubscriber = premiumPlan?.status === "active";
 
   const [showMultiOptions, setShowMultiOptions] = useState(false);
 
@@ -17,6 +23,65 @@ export default function Home() {
     if (!socket.connected) socket.connect();
     navigate(path, { state: { username } });
   };
+
+  const handleBuySubscription = async () => {
+    try {
+      // Use your specific SKU here
+      const result = await buySubscription(activeSubscriptionSku);
+      console.log("SUBSCRIPTION RESULT : " + JSON.stringify(result))
+
+      if (result.result === "success") {
+        console.log("Subscription purchased successfully!", result.subscription);
+        // Get the signed player token to prove identity to the backend
+        const signedData = await getPlayerSigned();
+        let subscriptionDetails = result.subscription.status == "active" ? [result.subscription] : []
+        setSubscriptions(subscriptionDetails)
+
+        // Call backend API to update subscription in DB
+        await axios.post(API.USER.UPDATE_SUBSCRIPTION, {
+          subscriptionDetails: result.subscription,
+          playerData: signedData.player
+        }, {
+          headers: { Authorization: signedData.playerSigned }
+        });
+
+        // alert("Subscription successfully purchased and synced to backend!");
+      } else if (result.result === "cancel") {
+        console.log("Subscription cancelled by user");
+      } else {
+        console.error("Subscription error", result.error);
+        // alert("Error buying subscription: " + result.error);
+      }
+    } catch (e) {
+      console.error("Failed to buy subscription", e);
+      // alert("Failed to initiate subscription");
+    }
+  };
+
+  const handlerSinglePlayer = async () => {
+    const signedData = await getPlayerSigned()
+    let response = await axios.post(API.GAME.START_GAME, {
+      playerData: signedData.player
+    }, {
+      headers: { Authorization: signedData.playerSigned }
+    })
+
+    console.log("game/start-game RESPONSE : " + JSON.stringify(response))
+    const { toShowInstructionScreen, instructionScreenData, questionScreenData } = response.data.data
+    console.log(toShowInstructionScreen)
+    console.log(instructionScreenData)
+    console.log(questionScreenData)
+
+    if (toShowInstructionScreen) {
+      navigate("/instructions", {
+        state: { instructionScreenData, questionScreenData, username }
+      })
+    } else {
+      navigate("/game", {
+        state: { currentQuestion: questionScreenData.question, username, mode: "single-player" }
+      })
+    }
+  }
 
   return (
     <div className="page">
@@ -36,7 +101,7 @@ export default function Home() {
             {/* Single Player */}
             <button
               className="btn btn-primary"
-              onClick={() => alert("Single-Player mode coming soon!")}
+              onClick={handlerSinglePlayer}
             >
               <span className="btn-icon">🎯</span>
               Single Player
@@ -50,6 +115,18 @@ export default function Home() {
               <span className="btn-icon">🌐</span>
               Multiplayer
             </button>
+
+            {/* Buy Subscription */}
+            {!isPremiumSubscriber && (
+              <button
+                className="btn btn-ghost"
+                onClick={handleBuySubscription}
+                style={{ marginTop: "1rem" }}
+              >
+                <span className="btn-icon">💎</span>
+                Buy Premium Plan
+              </button>
+            )}
           </div>
         ) : (
           /* ── Multiplayer Sub-options ── */

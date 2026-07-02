@@ -8,6 +8,7 @@ import {
   isJestSDKAvailable,
   loginPlayer,
   getPlayerSigned,
+  checkSubscription,
 } from "../services/jestService";
 import SplashScreen from "../components/SplashScreen";
 import axios from "axios"
@@ -33,6 +34,7 @@ export function JestProvider({ children }) {
   const [sdkReady, setSdkReady] = useState(false);
   const [player, setPlayer] = useState(null);
   const [savedProfile, setSavedProfile] = useState(null);
+  const [subscriptions, setSubscriptions] = useState([]);
   const sdkAvailable = isJestSDKAvailable();
 
   // Initialise the SDK once on mount
@@ -46,11 +48,18 @@ export function JestProvider({ children }) {
         if (cancelled) return;
 
         const player = getPlayer();
+        const { subscriptions, signed } = await checkSubscription()
+        setSubscriptions(subscriptions || [])
+        console.log("SUBSCRIPTION DETAILS : " + JSON.stringify(subscriptions))
         console.log("[JestContext] getPlayer() →", JSON.stringify(player));
         // console.log("[JestContext] SDK available?", isJestSDKAvailable());
 
         if (!player.registered)
           await loginPlayer()
+        else {
+
+        }
+
         const updatedPlayerSignedData = await getPlayerSigned()
         console.log("PLAYER DATA WITH SIGNED TOKEN : ", updatedPlayerSignedData)
         const updatedPlayer = updatedPlayerSignedData.player
@@ -82,7 +91,7 @@ export function JestProvider({ children }) {
           username = `Guest_${Math.floor(Math.random() * 9000) + 1000}`;
         }
 
-        // setSavedProfile({ username });
+        setSavedProfile({ username });
         sessionStorage.setItem("myUsername", username);
       } catch (err) {
         console.error("[JestContext] SDK init failed:", err);
@@ -114,7 +123,7 @@ export function JestProvider({ children }) {
   }
 
   return (
-    <JestContext.Provider value={{ player, sdkReady, sdkAvailable, savedProfile, saveProfile }}>
+    <JestContext.Provider value={{ player, sdkReady, sdkAvailable, savedProfile, saveProfile, subscriptions, setSubscriptions }}>
       {children}
     </JestContext.Provider>
   );

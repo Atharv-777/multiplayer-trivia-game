@@ -14,21 +14,17 @@ const io = new Server(server, {
     cors: { origin: "*" }
 })
 
-registerSocketHandler(io)
-
 // CORS — allow requests from the React dev server
 app.use(cors({ origin: "*" }))
 
 // Body parser — needed for POST /api/verify-player
 app.use(express.json())
 
-
 // REST API routes
 app.use("/api", router)
+registerSocketHandler(io)
 
 app.get("/", (req, res) => {
-    console.log("REQ")
-    console.log(req)
     res.send({ status: "OK" })
 })
 

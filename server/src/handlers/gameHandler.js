@@ -1,9 +1,11 @@
-const { getRoom, setRoom, getSettings } = require("../store");
+const { getRoom, setRoom, getSettings } = require("../Store");
 const { getQuestionForRoom, getQuestion } = require("../common/QuestionHelper");
 const _ = require("lodash");
 const redisUtils = require("../common/redisUtils");
 const { Constants } = require("../Constants");
-const { checkAnswer, addScore } = require("../common/GameHelper");
+const { checkAnswer, addScore, initializeRoundData, updateRoundData } = require("../common/GameHelper");
+const { downloadFile } = require("../common/BucketUtils");
+const { getTodayDate } = require("../common/DateHelper");
 
 async function handleStartGame(io, socket, data) {
     console.log("handleStartGame invoked")
@@ -128,12 +130,50 @@ async function handleNextQuestion(io, socket, data) {
 async function startGameHandler(req, res, context) {
     console.info("startGameHandler invoked")
     try {
+        const [settings, resource, questionSet] = await Promise.all([downloadFile(Constants.FILES.SETTINGS), downloadFile(Constants.FILES.RESOURCE), downloadFile(Constants.FILES.QUESTION.STANDARD)])
         let request = req.body
-        let playerData = request.playerData || {};
+        let response = {}
         let userData = _.get(context, Constants.STRINGS.USER_DATA)
-        let question = await getQuestion(context)
+        let roundData = _.get(userData, Constants.STRINGS.ROUND_DATA) || {}
+        let lastPlayedDate = _.get(userData, Constants.STRINGS.LAST_PLAYED_DATE)
+        let sessionCount = _.get(userData, Constants.STRINGS.SESSION_COUNT) || 0
+        let todaysDate = getTodayDate()
+        let subscriptionDetails = _.get(userData, Constants.STRINGS.SUBSCRIPTION_DETAILS) || {}
+        sessionCount += 1
+
+        if (lastPlayedDate != todaysDate) {
+            // new user
+            roundData = initializeRoundData(context, settings)
+        } else if (lastPlayedDate == todaysDate && roundData.currentRound <= roundData.totalRounds) {
+            // same day, but rounds are pending
+            roundData = updateRoundData(context, settings)
+        } else if (lastPlayedDate == todaysDate && roundData.currentRound > roundData.totalRounds) {
+            // rounds exhausted
+            return roundEndHelper(req, res, context)
+        }
+
+        let instructionText = resource.SINGLE_PLAYER_MODE_INSTRUCTION
+        let toShowInstructionScreen = (sessionCount < 4)
+        let batchSize = (subscriptionDetails.status == "active") ? settings.GAMEPLAY.SINGLE_PLAYER_QUESTION_COUNT : settings.GAMEPLAY.SINGLE_PLAYER_QUESTION_COUNT
+        let question = await getQuestion(context, batchSize, settings, questionSet)
         _.set(userData, Constants.STRINGS.LAST_QUESTION, question)
-        return res.status(200).json({ question: question, success: true })
+        _.set(userData, Constants.STRINGS.SESSION_COUNT, sessionCount)
+
+        response = {
+            success: true,
+            message: "",
+            data: {
+                toShowInstructionScreen: toShowInstructionScreen,
+                instructionScreenData: {
+                    instructionText: instructionText,
+                },
+                questionScreenData: {
+                    question: question,
+                }
+            }
+        }
+
+        return res.status(200).json(response)
     } catch (err) {
         console.error("Error @startGameHandler : ")
         console.error(err)
@@ -144,20 +184,47 @@ async function startGameHandler(req, res, context) {
 async function submitAnswerHandler(req, res, context) {
     console.info("submitAnswerHandler invoked")
     try {
+        const [settings] = await Promise.all([downloadFile(Constants.FILES.SETTINGS)])
         let request = req.body
+        let response = {}
         let answer = request.answer
         let userData = _.get(context, Constants.STRINGS.USER_DATA)
+        let roundData = _.get(userData, Constants.STRINGS.ROUND_DATA)
+        let isRoundComplete = false
+        let question = {}
 
         let isAnswerCorrect = checkAnswer(context, answer)
         if (isAnswerCorrect) addScore(context)
-        let question = getQuestion(context)
-        _.set(userData, Constants.STRINGS.LAST_QUESTION, question)
+        roundData = updateRoundData(context, settings)
+        if (roundData.currentQuestion > roundData.totalQuestionsPerRound) {
+            isRoundComplete = true
+        } else {
+            question = getQuestion(context, settings.GAMEPLAY.SUBSCRIBER.SINGLE_PLAYER_QUESTION_COUNT)
+            _.set(userData, Constants.STRINGS.LAST_QUESTION, question)
+        }
 
-        return res.status(200).json({ isCorrect: isAnswerCorrect, question: question })
+        response = {
+            isRoundComplete: isRoundComplete,
+            isCorrect: isAnswerCorrect,
+            question: question
+        }
+        return res.status(200).json(response)
     } catch (err) {
         console.error("Error @submitAnswerHandler : ")
         console.error(err)
         return res.status(500).json({ success: false, error: "Internal server error" })
     }
+}
+
+async function roundEndHelper(req, res, context) {
+    console.info("roundEndHelper invoked")
+    try {
+
+
+    } catch (err) {
+        console.error("Error @roundHelper: ")
+        console.error(err)
+    }
+
 }
 module.exports = { handleStartGame, handleSubmitAnswer, handleNextQuestion, startGameHandler, submitAnswerHandler }

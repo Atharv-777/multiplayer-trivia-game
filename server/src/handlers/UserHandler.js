@@ -1,21 +1,52 @@
 const { saveData } = require("../common/DBUtil");
 const { Constants } = require("../Constants");
+const _ = require("lodash")
 
 async function userRegistrationHandler(req, res, context) {
+    console.info("userRegistrationHandler invoked")
+    let response = {}
     try {
         let request = req.body
         let playerData = request.playerData || request;
         console.log("PLAYER DATA before saving : " + JSON.stringify(playerData))
         const data = await saveData(Constants.DB_TABLE.USER_DATA, playerData)
         console.log("Successfully saved data to DB : " + JSON.stringify(data))
+        response = {
+            success: true,
+            data: {
+                playerData
+            }
+        }
 
-        return res.status(200).json({ success: true, playerData: playerData });
+        return res.status(200).json(response);
 
     } catch (err) {
         console.error("Error @userRegistrationHandler : ")
         console.error(err)
+
         return res.status(500).json({ success: false, error: "Internal server error" });
     }
 }
 
-module.exports = { userRegistrationHandler }
+async function updatePlayerSubscriptionDetails(req, res, context) {
+    console.info("updatePlayerSubscritpionDetails invoked")
+    try {
+        let request = req.body
+        let userData = _.get(context, Constants.STRINGS.USER_DATA)
+        let subscriptionDetails = request.subscriptionDetails
+        subscriptionDetails = _.pick(subscriptionDetails, ["billingPeriod", "displayDescription", "displayName", "sku", "status"])
+        console.log("SUBSCRIPTION DETAILS : ")
+        console.log(subscriptionDetails)
+
+        _.set(userData, Constants.STRINGS.SUBSCRIPTION_DETAILS, subscriptionDetails)
+        console.log("Successfully updated subscription details")
+
+        return res.status(200).json({ success: true, message: "Successfully saved subscription details." })
+    } catch (err) {
+        console.error("Error @updatePlayerSubscriptionDetails : ")
+        console.error(err)
+        return res.status(500).json({ success: false, message: "Internal server error" })
+    }
+}
+
+module.exports = { userRegistrationHandler, updatePlayerSubscriptionDetails }

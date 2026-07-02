@@ -36,14 +36,14 @@ function authenticate(req) {
     }
 }
 
-async function getContext(playerId) {
+async function getContext(playerData) {
     console.log("getContext invoked")
     try {
         let context = {
             userData: {}
         }
-        let userData = await getData(Constants.DB_TABLE.USER_DATA, { playerId: playerId }) || {}
-        if (_.isEmpty(userData)) userData = { playerId: playerId }
+        let userData = await getData(Constants.DB_TABLE.USER_DATA, { playerId: playerData.playerId }) || {}
+        if (_.isEmpty(userData)) userData = playerData
         context.userData = userData
         return context
     } catch (err) {

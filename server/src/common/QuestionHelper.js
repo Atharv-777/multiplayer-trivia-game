@@ -1,5 +1,5 @@
 const { Constants } = require("../Constants");
-const { getRoom, setRoom, getSettings } = require("../store");
+const { getRoom, setRoom, getSettings } = require("../Store");
 // const { fetchQuestions } = require("./dbHelper");
 const { downloadFile } = require("./BucketUtils")
 const _ = require("lodash");
@@ -72,16 +72,16 @@ async function fetchQuestions(BATCH_SIZE) {
 
 }
 
-async function getQuestion(context) {
+async function getQuestion(context, batchSize, settings, questionSet) {
     console.log("getQuestion invoked")
     try {
         let userData = _.get(context, Constants.STRINGS.USER_DATA)
+        let subscriptionDetails = _.get(userData, Constants.STRINGS.SUBSCRIPTION_DETAILS) || {}
         let playerId = _.get(userData, Constants.STRINGS.PLAYER_ID)
-        let [settings, questionSet] = await Promise.all([downloadFile(Constants.FILES.SETTINGS), downloadFile(Constants.FILES.QUESTION.STANDARD)])
+        // let [settings, questionSet] = await Promise.all([downloadFile(Constants.FILES.SETTINGS), downloadFile(Constants.FILES.QUESTION.STANDARD)])
         let nextQuestionBatch = _.get(userData, Constants.STRINGS.NEXT_QUESTION_BATCH) || []
         console.log("QUESTION SET LENGTH : " + questionSet.length)
         console.log("nextQuestionBatch @before : " + JSON.stringify(nextQuestionBatch))
-        let batchSize = settings.GAMEPLAY.SINGLE_PLAYER_BATCH_SIZE
 
         if (_.isEmpty(nextQuestionBatch)) nextQuestionBatch = await fetchFileteredQuestion(context, playerId, batchSize)
         let index = _.random(0, nextQuestionBatch.length - 1)

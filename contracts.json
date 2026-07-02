@@ -2,11 +2,38 @@
     {
         "name": "user/register-user",
         "input": {
-            "playerData" : {}
+            "playerData": {
+                "playerId": "sim-za3qjcla",
+                "registered": true,
+                "username": "brave_wolf",
+                "avatarUrl": "https://api.dicebear.com/7.x/adventurer/svg?seed=brave_wolf",
+                "nextQuestionIndex": 25
+            }
         },
         "output": {
             "success": true,
-            "playerData": {}
+            "message": "",
+            "data": {
+                "playerData": {
+                    "playerId": "sim-za3qjcla",
+                    "registered": true,
+                    "username": "brave_wolf",
+                    "avatarUrl": "https://api.dicebear.com/7.x/adventurer/svg?seed=brave_wolf",
+                    "nextQuestionIndex": 25
+                },
+                "homeScreenData": {}
+            }
+        }
+    },
+    {
+        "name": "user/update-subscription",
+        "input": {
+            "playerData": {},
+            "subscriptionDetails": {}
+        },
+        "output": {
+            "success": true,
+            "message": ""
         }
     },
     {
@@ -15,7 +42,19 @@
             "playerData": {}
         },
         "output": {
-            "question": {}
+            "succes": true,
+            "message": "",
+            "data": {
+                "toShowInstructionScreen": true,
+                "instructionScreenData": {
+                    "instructionText": ""
+                },
+                "questionScreenData": {
+                    "question": {
+                        "type": "text/image/audio"
+                    }
+                }
+            }
         }
     },
     {
@@ -25,8 +64,18 @@
             "answer": ""
         },
         "output": {
-            "isCorrect": true,
-            "question": {}
+            "success": true,
+            "message": "",
+            "data": {
+                "isRoundComplete": false,
+                "answerScreenData": {
+                    "isCorrect": true
+                },
+                "questionScreenData": {
+                    "question": {}
+                },
+                "roundEndScreenData": {}
+            }
         }
     }
 ]
