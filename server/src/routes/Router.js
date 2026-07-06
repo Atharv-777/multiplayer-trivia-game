@@ -12,14 +12,13 @@
  */
 
 const express = require("express");
-const jwt = require("jsonwebtoken");
 require("dotenv").config()
 const _ = require("lodash");
-const RouteMap = require("./RouteMapper");
-const { authenticate, getContext } = require("../common/Middleware");
 const { Constants } = require("../Constants");
 const { saveData } = require("../common/DBUtil");
-
+const { authenticate, getContext } = require("../common/middleware");
+const { startGameHandler, submitAnswerHandler } = require("../handlers/gameHandler");
+const { userRegistrationHandler, updatePlayerSubscriptionDetails } = require("../handlers/UserHandler");
 const router = express.Router();
 /**
  * POST /api/verify-player
@@ -103,6 +102,14 @@ const router = express.Router();
 
 router.post("/*path", routeHandler)
 
+const RouteMap = {
+    "/user/register-user": userRegistrationHandler,
+    "/user/update-subscription": updatePlayerSubscriptionDetails,
+    // "/get-question": questionHandler,
+    "/game/start-game": startGameHandler,
+    "/game/submit-answer": submitAnswerHandler,
+}
+
 async function routeHandler(req, res) {
     console.log("routeHandler invoked")
     try {
@@ -111,12 +118,13 @@ async function routeHandler(req, res) {
         if (!authResp.valid) return res.status(401).json({ valid: false, error: authResp.error })
         let playerData = authResp.playerData
         // Guard: check if handler exists for this route
-        let context = await getContext(playerData)
+        let context = await getContext(playerData, "", "")
         const handler = RouteMap[req.path]
         if (!handler) return res.status(404).json({ error: `Route not found: ${req.path}` })
 
         let response = await handler(req, res, context)
         let userData = _.get(context, Constants.STRINGS.USER_DATA)
+        console.log("USER DATA after handler : " + JSON.stringify(userData))
         await saveData(Constants.DB_TABLE.USER_DATA, userData)
         return response
 

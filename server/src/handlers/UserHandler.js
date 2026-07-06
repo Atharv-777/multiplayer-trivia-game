@@ -7,10 +7,13 @@ async function userRegistrationHandler(req, res, context) {
     let response = {}
     try {
         let request = req.body
+        let userData = _.get(context, Constants.STRINGS.USER_DATA)
         let playerData = request.playerData || request;
-        console.log("PLAYER DATA before saving : " + JSON.stringify(playerData))
-        const data = await saveData(Constants.DB_TABLE.USER_DATA, playerData)
-        console.log("Successfully saved data to DB : " + JSON.stringify(data))
+        console.log("PLAYER DATA before saving : " + JSON.stringify(userData))
+        userData = { ...userData, ...playerData }
+        _.set(userData, Constants.STRINGS.COUNTRY, "US")
+        _.set(context, Constants.STRINGS.USER_DATA, userData)
+        console.log("Successfully saved data to DB : " + JSON.stringify(userData))
         response = {
             success: true,
             data: {

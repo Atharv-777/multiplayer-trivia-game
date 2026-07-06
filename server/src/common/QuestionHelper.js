@@ -7,69 +7,20 @@ const { getData, saveData } = require("./DBUtil");
 const { getRandomElement } = require("./Common");
 
 
-async function getQuestionForRoom(roomCode) {
+async function getQuestionForRoom(roomCode, questionSet) {
     console.log("getQuestionForRoom invoked")
     let room = getRoom(roomCode)
-    let setting = getSettings(roomCode)
+    // let roomData = await getData(Constants.DB_TABLE.ROOM_DATA, { roomId: roomCode })
+    let nextQuestionBatch = _.get(room, Constants.STRINGS.NEXT_QUESTION_BATCH)
+    let index = _.random(0, nextQuestionBatch.length - 1)
+    console.log("QUESTION INDEX : " + nextQuestionBatch[index])
+    let currentQuestion = questionSet[nextQuestionBatch[index]]
+    nextQuestionBatch.splice(index, 1)
 
-    console.log("SETTINGS @getQuestionForRoom : " + JSON.stringify(setting))
-
-    // Safety check: if room doesn't exist (e.g. server restarted), return a dummy or null
-    if (!room || !room.questions) {
-        console.error(`Room ${roomCode} not found in memory (server probably restarted).`);
-        return null;
-    }
-
-    let questionBatch = room.questions || []
-    let currentRound = room.currentRound
-    let quesIndexes = currentRound.questionIndexes || []
-
-    console.log("QUESTION INDEXES BEFORE : " + quesIndexes)
-
-    if (questionBatch.length == 0) {
-        questionBatch = await fetchQuestions(setting.GAMEPLAY.BATCH_SIZE)
-        quesIndexes = _.range(0, questionBatch.length)
-        let questionId = questionBatch.map((ele) => { return ele.id })
-        console.log("QUESTION IDs : ", questionId)
-        // room.questions.push(...questionBatch)
-    }
-
-    let quesIndex = _.random(0, questionBatch.length - 1)
-    let currentQuestion = questionBatch[quesIndex]
-
-    questionBatch.splice(quesIndex, 1)
-    quesIndexes.splice(quesIndex, 1)
-
-    console.log("QUES INDEXES AFTER : " + quesIndexes)
-
-    room.questions = questionBatch
-    room.currentRound.questionIndexes = quesIndexes || []
-    room.currentRound.question = currentQuestion.question || ""
-    room.currentRound.answer = currentQuestion.answer || ""
-    room.currentRound.questionStartTime = Date.now()  // for time-based scoring
+    _.set(currentQuestion, Constants.STRINGS.QUESTION_START_TIME, Date.now())
+    _.set(room, Constants.STRINGS.NEXT_QUESTION_BATCH, nextQuestionBatch)
     setRoom(roomCode, room)
-
     return currentQuestion
-}
-
-async function fetchQuestions(BATCH_SIZE) {
-    console.log("fetchQuestions invoked")
-    let questionSet = await downloadFile(Constants.FILES.QUESTION.STANDARD)
-    let randomIds = []
-    // console.log("QUESTION : " + JSON.stringify(questionSet[0]))
-
-    while (randomIds.length < BATCH_SIZE) {
-        const id = _.random(0, questionSet.length - 1)
-        if (!randomIds.includes(id)) randomIds.push(id)
-    }
-
-    console.log("RANDOM INDEXES : " + randomIds)
-
-    let questionBatch = randomIds.map(id => questionSet[id])
-    console.log("QUESTION BATCH : " + JSON.stringify(questionBatch))
-
-    return questionBatch
-
 }
 
 async function getQuestion(context, batchSize, settings, questionSet) {
@@ -83,13 +34,14 @@ async function getQuestion(context, batchSize, settings, questionSet) {
         console.log("QUESTION SET LENGTH : " + questionSet.length)
         console.log("nextQuestionBatch @before : " + JSON.stringify(nextQuestionBatch))
 
-        if (_.isEmpty(nextQuestionBatch)) nextQuestionBatch = await fetchFileteredQuestion(context, playerId, batchSize)
+        if (_.isEmpty(nextQuestionBatch)) nextQuestionBatch = await fetchFileteredQuestion(context, questionSet, batchSize)
         let index = _.random(0, nextQuestionBatch.length - 1)
         console.log("QUESTION INDEX : " + nextQuestionBatch[index])
         let currentQuestion = questionSet[nextQuestionBatch[index]]
         nextQuestionBatch.splice(index, 1)
         console.log("nextQuestionBatch @after : " + JSON.stringify(nextQuestionBatch))
         _.set(userData, Constants.STRINGS.NEXT_QUESTION_BATCH, nextQuestionBatch)
+        _.set(currentQuestion, Constants.STRINGS.QUESTION_START_TIME, Date.now())
 
         return currentQuestion
 
@@ -108,6 +60,7 @@ async function fetchFileteredQuestion(context, questionSet, batchSize) {
     let fileteredQuestionSet = _.get(userData, Constants.STRINGS.NEXT_QUESTION_BATCH) || []
 
     if (_.isEmpty(questionFragments)) {
+        console.log("QUESTION FRAGS EMPTY")
         questionFragments = {
             playerId: playerId,
             frags: []
@@ -115,8 +68,9 @@ async function fetchFileteredQuestion(context, questionSet, batchSize) {
     }
 
     let fragments = questionFragments.frags
+    console.log("FRAGMENTS : " + JSON.stringify(fragments))
     while (fileteredQuestionSet.length < batchSize) {
-        if (fragments.length === 0) fragments = [{ start: 0, end: questionSet.length }]
+        if (fragments.length === 0) fragments = [{ start: 0, end: questionSet.length - 1 }]
         let fragIndex = _.random(0, fragments.length - 1)
         let currentFragData = fragments[fragIndex]
         let currentQuestionIndex = _.random(currentFragData.start, currentFragData.end)
@@ -137,4 +91,4 @@ async function fetchFileteredQuestion(context, questionSet, batchSize) {
     return fileteredQuestionSet
 }
 
-module.exports = { getQuestionForRoom, getQuestion }
+module.exports = { getQuestionForRoom, getQuestion, fetchFileteredQuestion }

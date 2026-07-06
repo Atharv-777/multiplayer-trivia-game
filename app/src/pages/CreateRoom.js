@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useJest } from "../context/JestContext";
 import socket from "../socketConnection";
+import { getPlayerSigned } from "../services/jestService";
 
 export default function CreateRoom() {
   console.log("CreateRoom invoked")
@@ -46,10 +47,11 @@ export default function CreateRoom() {
       setError("Could not connect to server. Check your connection.");
     };
 
-    const doCreate = () => {
+    const doCreate = async () => {
       if (hasSentCreate.current) return;
       hasSentCreate.current = true;
-      socket.emit("room:create", { username });
+      const signedData = await getPlayerSigned();
+      socket.emit("room:create", { username, playerSigned: signedData.playerSigned, playerData: signedData.player });
     };
 
     socket.on("room:created", onRoomCreated);
@@ -75,9 +77,10 @@ export default function CreateRoom() {
   }, [username, navigate]);
 
 
-  const handleStartGame = () => {
+  const handleStartGame = async () => {
     console.log(`USERNAME : ${username} || ROOM CODE : ${roomCode}`)
-    socket.emit("game:start", { username, roomCode });
+    const signedData = await getPlayerSigned();
+    socket.emit("game:start", { username, roomCode, playerSigned: signedData.playerSigned, playerData: signedData.player });
   };
 
   if (!username) return null;

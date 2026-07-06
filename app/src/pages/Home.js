@@ -59,27 +59,35 @@ export default function Home() {
   };
 
   const handlerSinglePlayer = async () => {
-    const signedData = await getPlayerSigned()
-    let response = await axios.post(API.GAME.START_GAME, {
-      playerData: signedData.player
-    }, {
-      headers: { Authorization: signedData.playerSigned }
-    })
-
-    console.log("game/start-game RESPONSE : " + JSON.stringify(response))
-    const { toShowInstructionScreen, instructionScreenData, questionScreenData } = response.data.data
-    console.log(toShowInstructionScreen)
-    console.log(instructionScreenData)
-    console.log(questionScreenData)
-
-    if (toShowInstructionScreen) {
-      navigate("/instructions", {
-        state: { instructionScreenData, questionScreenData, username }
+    try {
+      const signedData = await getPlayerSigned()
+      let response = await axios.post(API.GAME.START_GAME, {
+        playerData: signedData.player
+      }, {
+        headers: { Authorization: signedData.playerSigned }
       })
-    } else {
-      navigate("/game", {
-        state: { currentQuestion: questionScreenData.question, username, mode: "single-player" }
-      })
+
+      console.log("game/start-game RESPONSE : " + JSON.stringify(response))
+      const { toShowInstructionScreen, instructionScreenData, questionScreenData } = response.data.data
+      console.log(toShowInstructionScreen)
+      console.log(instructionScreenData)
+      console.log(questionScreenData)
+
+      // Extract totalQuestionsPerRound from the question data if available
+      const totalQuestionsPerRound = response.data.data.totalQuestionsPerRound
+
+      if (toShowInstructionScreen) {
+        navigate("/instructions", {
+          state: { instructionScreenData, questionScreenData, username, totalQuestionsPerRound }
+        })
+      } else {
+        navigate("/game", {
+          state: { currentQuestion: questionScreenData.question, username, mode: "single-player", totalQuestionsPerRound }
+        })
+      }
+    } catch (err) {
+      console.error("Error starting single-player game:", err)
+      alert(err?.response?.data?.error || "Failed to start game. Please try again.")
     }
   }
 

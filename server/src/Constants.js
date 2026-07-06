@@ -7,7 +7,10 @@ const Constants = {
         SUBSCRIPTION_DETAILS: "subscriptionDetails",
         ROUND_DATA: "roundData",
         LAST_PLAYED_DATE: "lastPlayedDate",
-        SESSION_COUNT: "sessionCount"
+        SESSION_COUNT: "sessionCount",
+        QUESTION_START_TIME: "questionStartTime",
+        COUNTRY: "country",
+        LEADERBOARD_KEY: "leaderboardKey"
     },
     FILES: {
         QUESTION: {
@@ -18,7 +21,8 @@ const Constants = {
     },
     DB_TABLE: {
         USER_DATA: "multi-trivia-user-data",
-        FRAGMENTS: "multi-trivia-question-fragments"
+        FRAGMENTS: "multi-trivia-question-fragments",
+        ROOM_DATA: "multi-trivia-room-data"
     }
 }
 

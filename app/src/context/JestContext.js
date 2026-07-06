@@ -63,12 +63,12 @@ export function JestProvider({ children }) {
         const updatedPlayerSignedData = await getPlayerSigned()
         console.log("PLAYER DATA WITH SIGNED TOKEN : ", updatedPlayerSignedData)
         const updatedPlayer = updatedPlayerSignedData.player
-        await axios.post(API.USER.REGISTER, updatedPlayer, {
+        const response = await axios.post(API.USER.REGISTER, updatedPlayer, {
           headers: {
             Authorization: updatedPlayerSignedData.playerSigned
           }
         })
-        console.log("UPDATED PLAYER DATA : " + JSON.stringify(updatedPlayer))
+        console.log("UPDATED PLAYER DATA : " + JSON.stringify(response.data.data))
 
         setPlayer(updatedPlayer);
         // Try to load saved profile from Jest data store

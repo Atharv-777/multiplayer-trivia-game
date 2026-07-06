@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 export default function InstructionPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { instructionScreenData, questionScreenData, username } = location.state || {};
+  const { instructionScreenData, questionScreenData, username, totalQuestionsPerRound } = location.state || {};
   console.log("INSTRUCTION SCREEN")
   console.log(instructionScreenData)
   console.log(questionScreenData)
@@ -22,7 +22,7 @@ export default function InstructionPage() {
 
   const handleStartPlaying = () => {
     navigate("/game", {
-      state: { currentQuestion: questionScreenData.question, username, mode: "single-player" }
+      state: { currentQuestion: questionScreenData.question, username, mode: "single-player", totalQuestionsPerRound }
     });
   };
 

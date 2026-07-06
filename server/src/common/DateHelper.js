@@ -44,9 +44,19 @@ function getYesterdayDate(inputDate) {
     return `${year}-${month}-${day}`;
 }
 
+function getTodaysRemainingTTL() {
+    // Calculate seconds remaining until UTC midnight
+    let now = new Date()
+    let endOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0))
+    let secondsLeftInDay = Math.ceil((endOfDay.getTime() - now.getTime()) / 1000)
+
+    return secondsLeftInDay
+}
+
 module.exports = {
     getTodayDate,
     isDateEqual,
     isDateGreater,
-    getYesterdayDate
+    getYesterdayDate,
+    getTodaysRemainingTTL
 };
