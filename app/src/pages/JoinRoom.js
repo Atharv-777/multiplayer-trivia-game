@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import socket from "../socketConnection";
+import { getPlayerSigned } from "../services/jestService";
 
 export default function JoinRoom() {
   console.log("JoinRoom invoked")
@@ -58,8 +59,9 @@ export default function JoinRoom() {
     setError(null);
     setJoining(true);
 
-    const doJoin = () => {
-      socket.emit("room:join", { username, roomCode: roomCode.trim().toUpperCase() });
+    const doJoin = async () => {
+      const signedData = await getPlayerSigned();
+      socket.emit("room:join", { username, roomCode: roomCode.trim().toUpperCase(), playerSigned: signedData.playerSigned, playerData: signedData.player });
     };
 
     if (socket.connected) {

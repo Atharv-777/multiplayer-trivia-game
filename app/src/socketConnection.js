@@ -7,6 +7,9 @@ const SERVER_URL =
 const socket = io(SERVER_URL, {
   autoConnect: false,
   transports: ["polling", "websocket"],
+  extraHeaders: {
+    "ngrok-skip-browser-warning": "true",
+  },
 });
 
 export default socket;

@@ -1,13 +1,21 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useJest } from "../context/JestContext";
 import socket from "../socketConnection";
 import GameEndScreen from "./GameEndScreen";
+import axios from "axios";
+import API from "../services/apiEndpoints";
+import { getPlayerSigned } from "../services/jestService";
 
 export default function GamePage() {
     console.log("GamePage invoked")
     const location = useLocation();
     const navigate = useNavigate();
-    const { username, roomCode, currentQuestion, roundTime: initialRoundTime } = location.state || {};
+    const { savedProfile } = useJest();
+    const { roomCode, currentQuestion, roundTime: initialRoundTime, mode, totalQuestionsPerRound } = location.state || {};
+    const isSinglePlayer = mode === "single-player";
+    // location.state is primary; JestContext is the fallback
+    const username = location.state?.username || savedProfile?.username || "";
     console.log("CURRENT QUESTION : " + JSON.stringify(currentQuestion))
 
     const [roundTime, setRoundTime] = useState(initialRoundTime || 15); // seconds — driven by backend
@@ -43,9 +51,13 @@ export default function GamePage() {
         stopAudio();
         const audio = new Audio(url);
         audioRef.current = audio;
+        setIsAudioPlaying(true);
+        audio.onended = () => setIsAudioPlaying(false);
+        audio.onpause = () => setIsAudioPlaying(false);
         audio.play().catch((err) => {
             // Browsers may block autoplay — log silently
             console.warn("Audio playback blocked:", err);
+            setIsAudioPlaying(false);
         });
     }, [stopAudio]);
 
@@ -56,6 +68,18 @@ export default function GamePage() {
     const [nextCountdown, setNextCountdown] = useState(NEXT_QUESTION_DELAY);
     const [pointsEarned, setPointsEarned] = useState(null);
     const nextTimerRef = useRef(null);
+
+    // Single-player state
+    const [spScore, setSpScore] = useState(0);
+    const [spCorrectCount, setSpCorrectCount] = useState(0);
+    const [spAnswerResult, setSpAnswerResult] = useState(null); // { isCorrect, correctAnswer }
+    const [spSubmitting, setSpSubmitting] = useState(false);
+    const SP_FEEDBACK_DELAY = 3; // seconds to show answer feedback before next question
+
+    // New question type state
+    const [textAnswer, setTextAnswer] = useState("");
+    const [imageLoaded, setImageLoaded] = useState(false);
+    const [isAudioPlaying, setIsAudioPlaying] = useState(false);
 
     // Clear any running timer
     const clearTimer = useCallback(() => {
@@ -98,13 +122,25 @@ export default function GamePage() {
 
     // When timer expires, auto-submit empty answer so server counts us
     useEffect(() => {
+        const isTextType = question?.answerType === "text";
         if (timerExpired && !selectedOption) {
-            socket.emit("game:submitAnswer", {
-                roomCode,
-                answer: null, // no answer selected
-            });
+            const answerToSubmit = isTextType ? (textAnswer.trim() || null) : null;
+            if (isSinglePlayer) {
+                handleSinglePlayerSubmit(answerToSubmit);
+            } else {
+                (async () => {
+                    const signedData = await getPlayerSigned();
+                    socket.emit("game:submitAnswer", {
+                        roomCode,
+                        answer: answerToSubmit,
+                        playerSigned: signedData.playerSigned,
+                        playerData: signedData.player,
+                    });
+                })();
+            }
         }
-    }, [timerExpired, selectedOption, roomCode]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [timerExpired, selectedOption, roomCode, isSinglePlayer]);
 
     // Stop timer when player selects an answer
     useEffect(() => {
@@ -114,12 +150,15 @@ export default function GamePage() {
     }, [selectedOption, clearTimer]);
 
     useEffect(() => {
-        console.log(`USERNAME : ${username} || ROOM CODE : ${roomCode}`)
-        if (!username || !roomCode) {
+        console.log(`USERNAME : ${username} || ROOM CODE : ${roomCode} || MODE : ${mode}`)
+        if (!username || (!isSinglePlayer && !roomCode)) {
             console.log("USER NAME || ROOM CODE not found")
             navigate("/");
             return;
         }
+
+        // Single-player mode doesn't use Socket.IO — skip listeners
+        if (isSinglePlayer) return;
 
         const onQuestion = (data) => {
             // New question arriving — reset everything
@@ -130,6 +169,8 @@ export default function GamePage() {
             setQuestion(q);
             setQuestionNumber(q.questionNumber || questionNumber + 1);
             setSelectedOption(null);
+            setTextAnswer("");
+            setImageLoaded(false);
             setIsGameComplete(false);
             setLeaderboard([]);
             setNextCountdown(NEXT_QUESTION_DELAY);
@@ -142,14 +183,14 @@ export default function GamePage() {
             clearTimer();
             stopAudio();
             if (data.roundTime) setRoundTime(data.roundTime);
-            setIsGameComplete(data.isGameComplete || false);
+            setIsGameComplete(data.isRoundComplete || false);
             setLeaderboard(data.leaderboard || []);
 
             // Show points earned this round
             const myPoints = data.pointsThisRound?.[socket.id] ?? null;
             setPointsEarned(myPoints);
 
-            if (data.isGameComplete) {
+            if (data.isRoundComplete) {
                 // Game finished — GameEndScreen will render
             } else {
                 // Still playing — show scoreboard then countdown to next question
@@ -160,7 +201,10 @@ export default function GamePage() {
                         if (prev <= 1) {
                             clearInterval(nextTimerRef.current);
                             nextTimerRef.current = null;
-                            socket.emit("game:nextQuestion", { roomCode });
+                            (async () => {
+                                const signedData = await getPlayerSigned();
+                                socket.emit("game:nextQuestion", { roomCode, playerSigned: signedData.playerSigned, playerData: signedData.player });
+                            })();
                             return 0;
                         }
                         return prev - 1;
@@ -180,13 +224,115 @@ export default function GamePage() {
         };
     }, [username, roomCode, navigate, questionNumber, clearTimer, clearNextTimer, playAudio, stopAudio]);
 
+    // ── Single-player REST answer submission ──
+    const handleSinglePlayerSubmit = async (answer) => {
+        if (spSubmitting) return;
+        setSpSubmitting(true);
+        try {
+            const signedData = await getPlayerSigned();
+            const response = await axios.post(API.GAME.SUBMIT_ANSWER, {
+                answer: answer,
+                playerData: signedData.player
+            }, {
+                headers: { Authorization: signedData.playerSigned }
+            });
+            console.log("SUBMIT ANSWER RESPONSE : " + JSON.stringify(response.data.data))
+
+            const { isRoundComplete, answerScreenData, questionScreenData, roundEndScreenData } = response.data.data;
+
+            // Track score
+            if (answerScreenData?.isCorrect) {
+                setSpScore(answerScreenData?.roundScore);
+                setSpCorrectCount(prev => prev + 1);
+            }
+
+            // Show answer feedback
+            setSpAnswerResult({ isCorrect: answerScreenData.isCorrect, correctAnswer: question?.answer });
+            clearTimer();
+            stopAudio();
+
+            if (isRoundComplete) {
+                // Wait for feedback, then show game-end
+                setTimeout(() => {
+                    setSpAnswerResult(null);
+                    setIsGameComplete(true);
+                }, SP_FEEDBACK_DELAY * 1000);
+            } else {
+                let nextQuestion = questionScreenData.question
+                // console.log("Next Question: ", nextQuestion)
+                // Wait for feedback, then load next question
+                setTimeout(() => {
+                    setSpAnswerResult(null);
+                    setQuestion(nextQuestion);
+                    setQuestionNumber(prev => prev + 1);
+                    setSelectedOption(null);
+                    setTextAnswer("");
+                    setImageLoaded(false);
+                    setTimerExpired(false);
+                    setSpSubmitting(false);
+                    if (nextQuestion?.audioUrl) playAudio(nextQuestion.audioUrl);
+                }, SP_FEEDBACK_DELAY * 1000);
+            }
+        } catch (err) {
+            console.error("Error submitting SP answer:", err);
+            setSpSubmitting(false);
+        }
+    };
+
     const handleOptionClick = (option) => {
         if (selectedOption || timerExpired || showScoreboard) return;
         setSelectedOption(option);
-        socket.emit("game:submitAnswer", {
-            roomCode,
-            answer: option,
-        });
+
+        if (isSinglePlayer) {
+            handleSinglePlayerSubmit(option);
+        } else {
+            (async () => {
+                const signedData = await getPlayerSigned();
+                socket.emit("game:submitAnswer", {
+                    roomCode,
+                    answer: option,
+                    playerSigned: signedData.playerSigned,
+                    playerData: signedData.player,
+                });
+            })();
+        }
+    };
+
+    // Text answer submission
+    const handleTextSubmit = () => {
+        const trimmed = textAnswer.trim();
+        if (!trimmed || selectedOption || timerExpired) return;
+        setSelectedOption(trimmed); // mark as answered (reuse selectedOption as "answered" flag)
+
+        if (isSinglePlayer) {
+            handleSinglePlayerSubmit(trimmed);
+        } else {
+            (async () => {
+                const signedData = await getPlayerSigned();
+                socket.emit("game:submitAnswer", {
+                    roomCode,
+                    answer: trimmed,
+                    playerSigned: signedData.playerSigned,
+                    playerData: signedData.player,
+                });
+            })();
+        }
+    };
+
+    const handleTextKeyDown = (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            handleTextSubmit();
+        }
+    };
+
+    // Toggle audio replay
+    const handleAudioReplay = () => {
+        if (isAudioPlaying) {
+            stopAudio();
+        } else if (question?.audioUrl) {
+            playAudio(question.audioUrl);
+        }
     };
 
     // Derive correctness from question.answer (available client-side)
@@ -201,14 +347,27 @@ export default function GamePage() {
         return cls;
     };
 
+    // Determine question and answer types
+    const questionType = question?.questionType || "text";
+    const answerType = question?.answerType || "options";
+
     const MEDAL = ["🥇", "🥈", "🥉"];
 
-    if (!username || !roomCode) return null;
+    if (!username || (!isSinglePlayer && !roomCode)) return null;
 
 
 
     // ───────── Game End Screen ─────────
     if (isGameComplete) {
+        if (isSinglePlayer) {
+            return <GameEndScreen
+                mode="single-player"
+                username={username}
+                score={spScore}
+                correctCount={spCorrectCount}
+                totalQuestions={totalQuestionsPerRound || questionNumber}
+            />;
+        }
         return <GameEndScreen leaderboard={leaderboard} username={username} />;
     }
 
@@ -227,7 +386,65 @@ export default function GamePage() {
         );
     }
 
-    // ───────── Scoreboard Screen ─────────
+    // ───────── SP Answer Feedback Screen ─────────
+    if (isSinglePlayer && spAnswerResult) {
+        return (
+            <div className="page">
+                <div className="card glass game-card">
+                    {/* Header bar */}
+                    <div className="game-header">
+                        <span className="game-room-code">🎯 Solo</span>
+                        <span className="game-question-num">Q{questionNumber}{totalQuestionsPerRound ? `/${totalQuestionsPerRound}` : ''}</span>
+                    </div>
+
+                    {/* Result banner */}
+                    <div className={`answer-banner ${spAnswerResult.isCorrect ? 'answer-banner-correct' : 'answer-banner-incorrect'}`}>
+                        <span className="answer-banner-icon">
+                            {!selectedOption ? '⏰' : spAnswerResult.isCorrect ? '🎉' : '❌'}
+                        </span>
+                        <span className="answer-banner-text">
+                            {!selectedOption
+                                ? "Time's up!"
+                                : spAnswerResult.isCorrect
+                                    ? 'Correct!'
+                                    : 'Wrong!'}
+                        </span>
+                    </div>
+
+                    {/* Answer details */}
+                    <div className="round-scoreboard">
+                        {!spAnswerResult.isCorrect && (
+                            <div className="answer-summary-row">
+                                <span className="answer-summary-label">Correct answer</span>
+                                <span className="answer-summary-value text-correct">
+                                    {spAnswerResult.correctAnswer}
+                                </span>
+                            </div>
+                        )}
+                        <div className="answer-summary-row">
+                            <span className="answer-summary-label">Your score</span>
+                            <span className="answer-summary-value text-correct">
+                                {spScore} pts
+                            </span>
+                        </div>
+                        <div className="answer-summary-row">
+                            <span className="answer-summary-label">Accuracy</span>
+                            <span className="answer-summary-value">
+                                {questionNumber > 0 ? Math.round((spCorrectCount / questionNumber) * 100) : 0}%
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Auto-advance indicator */}
+                    <div className="next-question-countdown">
+                        <span className="countdown-label">Next question loading…</span>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // ───────── MP Scoreboard Screen ─────────
     if (showScoreboard) {
         return (
             <div className="page">
@@ -321,8 +538,8 @@ export default function GamePage() {
             <div className="card glass game-card">
                 {/* Header bar */}
                 <div className="game-header">
-                    <span className="game-room-code">{roomCode}</span>
-                    <span className="game-question-num">Q{questionNumber}</span>
+                    <span className="game-room-code">{isSinglePlayer ? '🎯 Solo' : roomCode}</span>
+                    <span className="game-question-num">Q{questionNumber}{isSinglePlayer && totalQuestionsPerRound ? `/${totalQuestionsPerRound}` : ''}</span>
                 </div>
 
                 {/* Timer progress bar */}
@@ -339,27 +556,84 @@ export default function GamePage() {
                 </div>
 
                 {/* Question */}
-                <h2 className="game-question">{question.question}</h2>
+                <h2 className={`game-question${questionType === "emoji" ? " game-question-emoji" : ""}`}>
+                    {question.question}
+                </h2>
 
-                {/* Options */}
-                <div className="game-options">
-                    {question.options.map((option, i) => (
+                {/* Conditional media block based on questionType */}
+                {questionType === "image" && question.imageUrl && (
+                    <div className="question-image-container">
+                        {!imageLoaded && <span className="question-image-loading">Loading image…</span>}
+                        <img
+                            src={question.imageUrl}
+                            alt="Question"
+                            className="question-image"
+                            style={!imageLoaded ? { display: 'none' } : {}}
+                            onLoad={() => setImageLoaded(true)}
+                        />
+                    </div>
+                )}
+
+                {questionType === "emoji" && (
+                    <div className="question-emoji">
+                        {(question.question.match(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu) || []).join(' ')}
+                    </div>
+                )}
+
+                {questionType === "audio" && question.audioUrl && (
+                    <div className="question-audio-controls">
                         <button
-                            key={i}
-                            className={getOptionClass(option)}
-                            onClick={() => handleOptionClick(option)}
-                            disabled={!!selectedOption || timerExpired}
+                            className={`audio-play-btn${isAudioPlaying ? " audio-playing" : ""}`}
+                            onClick={handleAudioReplay}
+                            type="button"
                         >
-                            <span className="option-letter">
-                                {String.fromCharCode(65 + i)}
-                            </span>
-                            <span className="option-text">{option}</span>
+                            <span className="audio-icon">{isAudioPlaying ? "⏸" : "▶️"}</span>
+                            {isAudioPlaying ? "Playing…" : "Play Audio"}
                         </button>
-                    ))}
-                </div>
+                    </div>
+                )}
+
+                {/* Answer area */}
+                {answerType === "options" && question.options && question.options.length > 0 ? (
+                    <div className="game-options">
+                        {question.options.map((option, i) => (
+                            <button
+                                key={i}
+                                className={getOptionClass(option)}
+                                onClick={() => handleOptionClick(option)}
+                                disabled={!!selectedOption || timerExpired}
+                            >
+                                <span className="option-letter">
+                                    {String.fromCharCode(65 + i)}
+                                </span>
+                                <span className="option-text">{option}</span>
+                            </button>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-answer-container">
+                        <input
+                            type="text"
+                            className="text-answer-input"
+                            placeholder="Type your answer…"
+                            value={textAnswer}
+                            onChange={(e) => setTextAnswer(e.target.value)}
+                            onKeyDown={handleTextKeyDown}
+                            disabled={!!selectedOption || timerExpired}
+                            autoFocus
+                        />
+                        <button
+                            className="text-answer-submit"
+                            onClick={handleTextSubmit}
+                            disabled={!!selectedOption || timerExpired || !textAnswer.trim()}
+                        >
+                            Submit
+                        </button>
+                    </div>
+                )}
 
                 {/* Waiting indicator after answering, before round end */}
-                {(selectedOption || timerExpired) && (
+                {(selectedOption || timerExpired) && !isSinglePlayer && (
                     <div className="game-waiting-result">
                         <div className="waiting-dots">
                             <span className="dot"></span>
@@ -367,6 +641,17 @@ export default function GamePage() {
                             <span className="dot"></span>
                         </div>
                         <p className="hint-text">Waiting for other players…</p>
+                    </div>
+                )}
+                {/* SP: Show brief submitting indicator */}
+                {(selectedOption || timerExpired) && isSinglePlayer && spSubmitting && (
+                    <div className="game-waiting-result">
+                        <div className="waiting-dots">
+                            <span className="dot"></span>
+                            <span className="dot"></span>
+                            <span className="dot"></span>
+                        </div>
+                        <p className="hint-text">Checking your answer…</p>
                     </div>
                 )}
             </div>

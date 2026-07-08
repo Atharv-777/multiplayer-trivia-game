@@ -39,6 +39,12 @@ class RedisUtils {
         await this.redisClient.zIncrBy(key, score, field)
     }
 
+    async createTodaysKey(key, field, score, ttl) {
+        await this._ensureConnected()
+        await this.redisClient.zAdd(key, { score: score, value: field })
+        await this.redisClient.expire(key, ttl)
+    }
+
     async getAllEntries(key, end) {
         await this._ensureConnected()
         return await this.redisClient.zRangeWithScores(key, 0, end, { REV: true })
@@ -51,4 +57,4 @@ class RedisUtils {
 }
 
 // Singleton — created once when the module is first required
-module.exports = new RedisUtils()
+module.exports = RedisUtils
