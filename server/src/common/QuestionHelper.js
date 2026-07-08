@@ -4,7 +4,7 @@ const { getRoom, setRoom, getSettings } = require("../Store");
 const { downloadFile } = require("./BucketUtils")
 const _ = require("lodash");
 const { getData, saveData } = require("./DBUtil");
-const { getRandomElement } = require("./Common");
+const { getRandomElement, getUrl } = require("./Common");
 
 
 async function getQuestionForRoom(roomCode, questionSet) {
@@ -39,6 +39,7 @@ async function getQuestion(context, batchSize, settings, questionSet) {
         console.log("QUESTION INDEX : " + nextQuestionBatch[index])
         let currentQuestion = questionSet[nextQuestionBatch[index]]
         nextQuestionBatch.splice(index, 1)
+        currentQuestion = resolveUrls(currentQuestion)
         console.log("nextQuestionBatch @after : " + JSON.stringify(nextQuestionBatch))
         _.set(userData, Constants.STRINGS.NEXT_QUESTION_BATCH, nextQuestionBatch)
         _.set(currentQuestion, Constants.STRINGS.QUESTION_START_TIME, Date.now())
@@ -89,6 +90,26 @@ async function fetchFileteredQuestion(context, questionSet, batchSize) {
     questionFragments.frags = fragments
     await saveData(Constants.DB_TABLE.FRAGMENTS, questionFragments)
     return fileteredQuestionSet
+}
+
+function resolveUrls(question) {
+    switch (question.questionType) {
+        case "image":
+            if (!question.imageUrl || question.imageUrl == "") break
+            question.imageUrl = getUrl("QUESTION", question.imageUrl)
+            break
+        case "audio":
+            if (!question.audioUrl || question.audioUrl == "") break
+            question.audioUrl = getUrl("QUESTION", question.audioUrl)
+            break
+        case "text":
+        case "emoji":
+            break
+        default:
+            console.error("No case matched for question type : " + question.questionType)
+            break
+    }
+    return question
 }
 
 module.exports = { getQuestionForRoom, getQuestion, fetchFileteredQuestion }

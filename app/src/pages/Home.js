@@ -87,7 +87,7 @@ export default function Home() {
       }
     } catch (err) {
       console.error("Error starting single-player game:", err)
-      alert(err?.response?.data?.error || "Failed to start game. Please try again.")
+      // alert(err?.response?.data?.error || "Failed to start game. Please try again.")
     }
   }
 

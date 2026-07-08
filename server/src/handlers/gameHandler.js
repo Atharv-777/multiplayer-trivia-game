@@ -169,6 +169,9 @@ async function startGameHandler(req, res, context) {
         let subscriptionDetails = _.get(userData, Constants.STRINGS.SUBSCRIPTION_DETAILS) || {}
         sessionCount += 1
 
+        console.log(`LAST PLAYED DATE : ${lastPlayedDate}, TODAYS DATE : ${todaysDate}`)
+        console.log("ROUND DATA : " + JSON.stringify(roundData))
+
         if (lastPlayedDate != todaysDate) {
             // new user
             roundData = initializeRoundData(context, settings)
@@ -180,7 +183,7 @@ async function startGameHandler(req, res, context) {
         } else if (lastPlayedDate == todaysDate && roundData.currentRound < roundData.totalRounds) {
             // same day, but rounds are pending
             roundData = updateRoundData(context, settings)
-        } else if (lastPlayedDate == todaysDate && roundData.currentRound > roundData.totalRounds) {
+        } else if (lastPlayedDate == todaysDate && roundData.currentRound >= roundData.totalRounds) {
             // rounds exhausted
             return roundEndHelper(req, res, context)
         }

@@ -45,13 +45,14 @@ async function addScore(context, pointsEarned) {
 function initializeRoundData(context, settings) {
     let userData = _.get(context, Constants.STRINGS.USER_DATA)
     let subscriptionDetails = _.get(userData, Constants.STRINGS.SUBSCRIPTION_DETAILS) || {}
-    let roundData = {
+    let roundData = _.get(userData, Constants.STRINGS.ROUND_DATA) || {}
+    roundData = {
         currentRound: 1,
         totalRounds: (subscriptionDetails.status == "active") ? settings.GAMEPLAY.SUBSCRIBER.SINGLE_PLAYER_ROUND : settings.GAMEPLAY.NON_SUBSCRIBER.SINGLE_PLAYER_ROUND,
         currentRoundScore: 0,
         currentQuestion: 1,
         totalQuestionsPerRound: settings.GAMEPLAY.SINGLE_PLAYER_QUESTION_COUNT,
-        multiplayerRound: (subscriptionDetails.status == "active") ? settings.GAMEPLAY.SUBSCRIBER.MULTIPLAYER_ROUND : settings.GAMEPLAY.NON_SUBSCRIBER.MULTIPLAYER_ROUND
+        multiplayerRound: roundData.multiplayerRound || (subscriptionDetails.status == "active") ? settings.GAMEPLAY.SUBSCRIBER.MULTIPLAYER_ROUND : settings.GAMEPLAY.NON_SUBSCRIBER.MULTIPLAYER_ROUND
     }
 
     _.set(userData, Constants.STRINGS.ROUND_DATA, roundData)
@@ -78,6 +79,18 @@ function updateRoundData(context) {
     return roundData
 }
 
+function updateRoundDataForSubscriber(context, settings) {
+    console.info("updateRoundDataForSubscriber invoked")
+    let userData = _.get(context, Constants.STRINGS.USER_DATA)
+    let roundData = _.get(userData, Constants.STRINGS.ROUND_DATA) || {}
+
+    roundData.totalRounds = settings.GAMEPLAY.SUBSCRIBER.SINGLE_PLAYER_ROUND
+    roundData.multiplayerRound = settings.GAMEPLAY.SUBSCRIBER.MULTIPLAYER_ROUND
+
+    _.set(userData, Constants.STRINGS.ROUND_DATA, roundData)
+    return roundData
+}
+
 function initializeRoomRoundData(settings) {
     console.info("initializeRoomRoundData invoked")
 
@@ -88,15 +101,6 @@ function initializeRoomRoundData(settings) {
 
     // _.set(room, Constants.STRINGS.ROUND_DATA, roundData)
     return roundData
-}
-
-function updateMultiplayerRoundData(context) {
-    console.info("updateMultiplayerRoundData invoked")
-
-    let userData = _.get(context, Constants.STRINGS.USER_DATA)
-    let subscriptionDetails = _.get(userData, Constants.STRINGS.SUBSCRIPTION_DETAILS)
-    let roundData = _.get(userData, Constants.STRINGS.ROUND_DATA)
-
 }
 
 function getLeaderboardKey(context, type, roomCode) {
@@ -121,4 +125,4 @@ function getLeaderboardKey(context, type, roomCode) {
 
 }
 
-module.exports = { checkAnswerAndCalculatePoints, addScore, initializeRoundData, updateRoundData, initializeRoomRoundData, updateMultiplayerRoundData, getLeaderboardKey }
+module.exports = { checkAnswerAndCalculatePoints, addScore, initializeRoundData, updateRoundData, updateRoundDataForSubscriber, initializeRoomRoundData, getLeaderboardKey }

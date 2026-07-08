@@ -1,4 +1,6 @@
+const { downloadFile } = require("../common/BucketUtils");
 const { saveData } = require("../common/DBUtil");
+const { updateRoundDataForSubscriber } = require("../common/GameHelper");
 const { Constants } = require("../Constants");
 const _ = require("lodash")
 
@@ -34,12 +36,14 @@ async function userRegistrationHandler(req, res, context) {
 async function updatePlayerSubscriptionDetails(req, res, context) {
     console.info("updatePlayerSubscritpionDetails invoked")
     try {
+        let settings = await downloadFile(Constants.FILES.SETTINGS)
         let request = req.body
         let userData = _.get(context, Constants.STRINGS.USER_DATA)
         let subscriptionDetails = request.subscriptionDetails
         subscriptionDetails = _.pick(subscriptionDetails, ["billingPeriod", "displayDescription", "displayName", "sku", "status"])
         console.log("SUBSCRIPTION DETAILS : ")
         console.log(subscriptionDetails)
+        updateRoundDataForSubscriber(context, settings)
 
         _.set(userData, Constants.STRINGS.SUBSCRIPTION_DETAILS, subscriptionDetails)
         console.log("Successfully updated subscription details")
