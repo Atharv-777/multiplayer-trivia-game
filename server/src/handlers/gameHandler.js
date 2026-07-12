@@ -8,6 +8,7 @@ const { downloadFile } = require("../common/BucketUtils");
 const { getTodayDate, getTodaysRemainingTTL } = require("../common/DateHelper");
 const RedisUtils = require("../common/redisUtils");
 const { getData, saveData } = require("../common/DBUtil");
+const { response } = require("express");
 
 
 // Multiplayer handler
@@ -156,10 +157,10 @@ async function handleRoomNextQuestion(io, socket, data) {
 // Single Player Handlers
 async function startGameHandler(req, res, context) {
     console.info("startGameHandler invoked")
+    let response = {}
     try {
         const [settings, resource, questionSet] = await Promise.all([downloadFile(Constants.FILES.SETTINGS), downloadFile(Constants.FILES.RESOURCE), downloadFile(Constants.FILES.QUESTION.STANDARD)])
         let request = req.body
-        let response = {}
         let userData = _.get(context, Constants.STRINGS.USER_DATA)
         let playerId = _.get(userData, Constants.STRINGS.PLAYER_ID)
         let roundData = _.get(userData, Constants.STRINGS.ROUND_DATA) || {}
@@ -196,6 +197,7 @@ async function startGameHandler(req, res, context) {
         _.set(userData, Constants.STRINGS.SESSION_COUNT, sessionCount)
 
         response = {
+            status: 200,
             success: true,
             message: "",
             data: {
@@ -210,20 +212,21 @@ async function startGameHandler(req, res, context) {
             }
         }
 
-        return res.status(200).json(response)
+        return response
     } catch (err) {
         console.error("Error @startGameHandler : ")
         console.error(err)
-        return res.status(500).json({ success: false, error: "Internal server error" })
+        response = { status: 500, success: false, error: "Internal server error" }
+        return response
     }
 }
 
 async function submitAnswerHandler(req, res, context) {
     console.info("submitAnswerHandler invoked")
+    let response = {}
     try {
         const [settings, questionSet] = await Promise.all([downloadFile(Constants.FILES.SETTINGS), downloadFile(Constants.FILES.QUESTION.STANDARD)])
         let request = req.body
-        let response = {}
         let answer = request.answer
         let userData = _.get(context, Constants.STRINGS.USER_DATA)
         let roundData = _.get(userData, Constants.STRINGS.ROUND_DATA)
@@ -244,6 +247,7 @@ async function submitAnswerHandler(req, res, context) {
         }
 
         response = {
+            status: 200,
             success: true,
             message: "",
             data: {
@@ -258,11 +262,16 @@ async function submitAnswerHandler(req, res, context) {
                 roundEndScreenData: {}
             }
         }
-        return res.status(200).json(response)
+        return response
     } catch (err) {
         console.error("Error @submitAnswerHandler : ")
         console.error(err)
-        return res.status(500).json({ success: false, error: "Internal server error" })
+        response = {
+            status: 500,
+            success: false,
+            error: "Internal server error"
+        }
+        return response
     }
 }
 

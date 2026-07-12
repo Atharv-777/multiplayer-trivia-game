@@ -8,35 +8,32 @@ import API from "../services/apiEndpoints";
 import { getPlayerSigned } from "../services/jestService";
 
 export default function GamePage() {
-    console.log("GamePage invoked")
     const location = useLocation();
     const navigate = useNavigate();
     const { savedProfile } = useJest();
     const { roomCode, currentQuestion, roundTime: initialRoundTime, mode, totalQuestionsPerRound } = location.state || {};
     const isSinglePlayer = mode === "single-player";
-    // location.state is primary; JestContext is the fallback
     const username = location.state?.username || savedProfile?.username || "";
-    console.log("CURRENT QUESTION : " + JSON.stringify(currentQuestion))
 
-    const [roundTime, setRoundTime] = useState(initialRoundTime || 15); // seconds — driven by backend
-    const NEXT_QUESTION_DELAY = 5; // seconds to show answer screen
+    const [roundTime, setRoundTime] = useState(initialRoundTime || 15);
+    const NEXT_QUESTION_DELAY = 5;
 
     const [question, setQuestion] = useState(currentQuestion);
 
-    // Play voiceover for the very first question (passed via location.state)
+    // Play voiceover for the very first question
     useEffect(() => {
         if (currentQuestion?.audioUrl) playAudio(currentQuestion.audioUrl);
         return () => stopAudio();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
     const [selectedOption, setSelectedOption] = useState(null);
     const [questionNumber, setQuestionNumber] = useState(1);
     const [timeLeft, setTimeLeft] = useState(roundTime);
     const [timerExpired, setTimerExpired] = useState(false);
     const timerRef = useRef(null);
-    const audioRef = useRef(null); // holds the current question's Audio instance
+    const audioRef = useRef(null);
 
-    // Helper: stop whatever audio is currently playing
     const stopAudio = useCallback(() => {
         if (audioRef.current) {
             audioRef.current.pause();
@@ -45,7 +42,6 @@ export default function GamePage() {
         }
     }, []);
 
-    // Helper: play a Firebase Storage MP3 URL
     const playAudio = useCallback((url) => {
         if (!url) return;
         stopAudio();
@@ -55,13 +51,11 @@ export default function GamePage() {
         audio.onended = () => setIsAudioPlaying(false);
         audio.onpause = () => setIsAudioPlaying(false);
         audio.play().catch((err) => {
-            // Browsers may block autoplay — log silently
             console.warn("Audio playback blocked:", err);
             setIsAudioPlaying(false);
         });
     }, [stopAudio]);
 
-    // Scoreboard screen state
     const [showScoreboard, setShowScoreboard] = useState(false);
     const [isGameComplete, setIsGameComplete] = useState(false);
     const [leaderboard, setLeaderboard] = useState([]);
@@ -71,36 +65,27 @@ export default function GamePage() {
 
     // Single-player state
     const [spScore, setSpScore] = useState(0);
+    const [spLastPointsEarned, setSpLastPointsEarned] = useState(0);
     const [spCorrectCount, setSpCorrectCount] = useState(0);
-    const [spAnswerResult, setSpAnswerResult] = useState(null); // { isCorrect, correctAnswer }
+    const [spAnswerResult, setSpAnswerResult] = useState(null);
     const [spSubmitting, setSpSubmitting] = useState(false);
-    const SP_FEEDBACK_DELAY = 3; // seconds to show answer feedback before next question
+    const SP_FEEDBACK_DELAY = 3;
 
-    // New question type state
     const [textAnswer, setTextAnswer] = useState("");
     const [imageLoaded, setImageLoaded] = useState(false);
     const [isAudioPlaying, setIsAudioPlaying] = useState(false);
 
-    // Clear any running timer
     const clearTimer = useCallback(() => {
-        if (timerRef.current) {
-            clearInterval(timerRef.current);
-            timerRef.current = null;
-        }
+        if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
     }, []);
 
     const clearNextTimer = useCallback(() => {
-        if (nextTimerRef.current) {
-            clearInterval(nextTimerRef.current);
-            nextTimerRef.current = null;
-        }
+        if (nextTimerRef.current) { clearInterval(nextTimerRef.current); nextTimerRef.current = null; }
     }, []);
 
-    // Start/restart the countdown whenever a new question appears
+    // Countdown timer
     useEffect(() => {
         if (!question || showScoreboard) return;
-
-        // Reset timer state
         setTimeLeft(roundTime);
         setTimerExpired(false);
         clearTimer();
@@ -120,7 +105,7 @@ export default function GamePage() {
         return () => clearTimer();
     }, [question, showScoreboard, clearTimer, roundTime]);
 
-    // When timer expires, auto-submit empty answer so server counts us
+    // Auto-submit on timer expire
     useEffect(() => {
         const isTextType = question?.answerType === "text";
         if (timerExpired && !selectedOption) {
@@ -131,10 +116,8 @@ export default function GamePage() {
                 (async () => {
                     const signedData = await getPlayerSigned();
                     socket.emit("game:submitAnswer", {
-                        roomCode,
-                        answer: answerToSubmit,
-                        playerSigned: signedData.playerSigned,
-                        playerData: signedData.player,
+                        roomCode, answer: answerToSubmit,
+                        playerSigned: signedData.playerSigned, playerData: signedData.player,
                     });
                 })();
             }
@@ -142,26 +125,15 @@ export default function GamePage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [timerExpired, selectedOption, roomCode, isSinglePlayer]);
 
-    // Stop timer when player selects an answer
     useEffect(() => {
-        if (selectedOption) {
-            clearTimer();
-        }
+        if (selectedOption) clearTimer();
     }, [selectedOption, clearTimer]);
 
     useEffect(() => {
-        console.log(`USERNAME : ${username} || ROOM CODE : ${roomCode} || MODE : ${mode}`)
-        if (!username || (!isSinglePlayer && !roomCode)) {
-            console.log("USER NAME || ROOM CODE not found")
-            navigate("/");
-            return;
-        }
-
-        // Single-player mode doesn't use Socket.IO — skip listeners
+        if (!username || (!isSinglePlayer && !roomCode)) { navigate("/"); return; }
         if (isSinglePlayer) return;
 
         const onQuestion = (data) => {
-            // New question arriving — reset everything
             const q = data.currentQuestion || data;
             if (data.roundTime) setRoundTime(data.roundTime);
             setShowScoreboard(false);
@@ -174,26 +146,19 @@ export default function GamePage() {
             setIsGameComplete(false);
             setLeaderboard([]);
             setNextCountdown(NEXT_QUESTION_DELAY);
-            // Play the pre-generated voiceover MP3 from Firebase Storage
             if (q.audioUrl) playAudio(q.audioUrl);
         };
 
         const onRoundEnd = (data) => {
-            // Round is over — show the scoreboard; stop voiceover
             clearTimer();
             stopAudio();
             if (data.roundTime) setRoundTime(data.roundTime);
             setIsGameComplete(data.isRoundComplete || false);
             setLeaderboard(data.leaderboard || []);
-
-            // Show points earned this round
             const myPoints = data.pointsThisRound?.[socket.id] ?? null;
             setPointsEarned(myPoints);
 
-            if (data.isRoundComplete) {
-                // Game finished — GameEndScreen will render
-            } else {
-                // Still playing — show scoreboard then countdown to next question
+            if (!data.isRoundComplete) {
                 setShowScoreboard(true);
                 setNextCountdown(NEXT_QUESTION_DELAY);
                 nextTimerRef.current = setInterval(() => {
@@ -220,47 +185,40 @@ export default function GamePage() {
             socket.off("game:question", onQuestion);
             socket.off("game:roundEnd", onRoundEnd);
             clearNextTimer();
-            stopAudio(); // clean up audio on unmount
+            stopAudio();
         };
     }, [username, roomCode, navigate, questionNumber, clearTimer, clearNextTimer, playAudio, stopAudio]);
 
-    // ── Single-player REST answer submission ──
+    // ── SP Answer Submission ──
     const handleSinglePlayerSubmit = async (answer) => {
         if (spSubmitting) return;
         setSpSubmitting(true);
         try {
             const signedData = await getPlayerSigned();
             const response = await axios.post(API.GAME.SUBMIT_ANSWER, {
-                answer: answer,
-                playerData: signedData.player
-            }, {
-                headers: { Authorization: signedData.playerSigned }
-            });
-            console.log("SUBMIT ANSWER RESPONSE : " + JSON.stringify(response.data.data))
+                answer, playerData: signedData.player
+            }, { headers: { Authorization: signedData.playerSigned } });
 
-            const { isRoundComplete, answerScreenData, questionScreenData, roundEndScreenData } = response.data.data;
+            const { isRoundComplete, answerScreenData, questionScreenData } = response.data.data;
 
-            // Track score
+            const newScore = answerScreenData?.roundScore || spScore;
+            const earned = answerScreenData?.isCorrect ? (newScore - spScore) : 0;
             if (answerScreenData?.isCorrect) {
-                setSpScore(answerScreenData?.roundScore);
+                setSpScore(newScore);
+                setSpLastPointsEarned(earned);
                 setSpCorrectCount(prev => prev + 1);
+            } else {
+                setSpLastPointsEarned(0);
             }
 
-            // Show answer feedback
             setSpAnswerResult({ isCorrect: answerScreenData.isCorrect, correctAnswer: question?.answer });
             clearTimer();
             stopAudio();
 
             if (isRoundComplete) {
-                // Wait for feedback, then show game-end
-                setTimeout(() => {
-                    setSpAnswerResult(null);
-                    setIsGameComplete(true);
-                }, SP_FEEDBACK_DELAY * 1000);
+                setTimeout(() => { setSpAnswerResult(null); setIsGameComplete(true); }, SP_FEEDBACK_DELAY * 1000);
             } else {
-                let nextQuestion = questionScreenData.question
-                // console.log("Next Question: ", nextQuestion)
-                // Wait for feedback, then load next question
+                const nextQuestion = questionScreenData.question;
                 setTimeout(() => {
                     setSpAnswerResult(null);
                     setQuestion(nextQuestion);
@@ -282,82 +240,50 @@ export default function GamePage() {
     const handleOptionClick = (option) => {
         if (selectedOption || timerExpired || showScoreboard) return;
         setSelectedOption(option);
-
         if (isSinglePlayer) {
             handleSinglePlayerSubmit(option);
         } else {
             (async () => {
                 const signedData = await getPlayerSigned();
                 socket.emit("game:submitAnswer", {
-                    roomCode,
-                    answer: option,
-                    playerSigned: signedData.playerSigned,
-                    playerData: signedData.player,
+                    roomCode, answer: option,
+                    playerSigned: signedData.playerSigned, playerData: signedData.player,
                 });
             })();
         }
     };
 
-    // Text answer submission
     const handleTextSubmit = () => {
         const trimmed = textAnswer.trim();
         if (!trimmed || selectedOption || timerExpired) return;
-        setSelectedOption(trimmed); // mark as answered (reuse selectedOption as "answered" flag)
-
+        setSelectedOption(trimmed);
         if (isSinglePlayer) {
             handleSinglePlayerSubmit(trimmed);
         } else {
             (async () => {
                 const signedData = await getPlayerSigned();
                 socket.emit("game:submitAnswer", {
-                    roomCode,
-                    answer: trimmed,
-                    playerSigned: signedData.playerSigned,
-                    playerData: signedData.player,
+                    roomCode, answer: trimmed,
+                    playerSigned: signedData.playerSigned, playerData: signedData.player,
                 });
             })();
         }
     };
 
-    const handleTextKeyDown = (e) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            handleTextSubmit();
-        }
-    };
-
-    // Toggle audio replay
     const handleAudioReplay = () => {
-        if (isAudioPlaying) {
-            stopAudio();
-        } else if (question?.audioUrl) {
-            playAudio(question.audioUrl);
-        }
+        if (isAudioPlaying) stopAudio();
+        else if (question?.audioUrl) playAudio(question.audioUrl);
     };
 
-    // Derive correctness from question.answer (available client-side)
     const correctAnswer = question?.answer;
     const playerIsCorrect = selectedOption && selectedOption === correctAnswer;
-
-    const getOptionClass = (option) => {
-        let cls = "game-option";
-        // Still playing — just highlight selected
-        if (selectedOption === option) cls += " selected";
-        if ((selectedOption || timerExpired) && selectedOption !== option) cls += " disabled";
-        return cls;
-    };
-
-    // Determine question and answer types
     const questionType = question?.questionType || "text";
     const answerType = question?.answerType || "options";
-
     const MEDAL = ["🥇", "🥈", "🥉"];
 
     if (!username || (!isSinglePlayer && !roomCode)) return null;
 
-
-
-    // ───────── Game End Screen ─────────
+    // ── Game End Screen ──
     if (isGameComplete) {
         if (isSinglePlayer) {
             return <GameEndScreen
@@ -371,149 +297,157 @@ export default function GamePage() {
         return <GameEndScreen leaderboard={leaderboard} username={username} />;
     }
 
-    // Waiting for first question from the server
+    // ── Get Ready (no question yet) ──
     if (!question) {
         return (
             <div className="page">
-                <div className="card glass game-card">
-                    <h1 className="title">Get Ready!</h1>
-                    <p className="subtitle">Waiting for the first question…</p>
-                    <div className="loader-container">
-                        <div className="loader"></div>
+                <div className="get-ready-screen">
+                    <span className="get-ready-emoji">🚀</span>
+                    <h2 className="get-ready-title">Get Ready!</h2>
+                    <p className="get-ready-subtitle">Waiting for the first question…</p>
+                    <div className="waiting-dots">
+                        <span className="dot" /><span className="dot" /><span className="dot" />
                     </div>
                 </div>
             </div>
         );
     }
 
-    // ───────── SP Answer Feedback Screen ─────────
+    // ── SP Answer Feedback Screen (Screens 7 & 8) ──
     if (isSinglePlayer && spAnswerResult) {
+        const isCorrect = spAnswerResult.isCorrect;
+        const isTimeout = !selectedOption;
+        const progressPct = totalQuestionsPerRound
+            ? Math.round((questionNumber / totalQuestionsPerRound) * 100)
+            : 0;
+
         return (
             <div className="page">
-                <div className="card glass game-card">
-                    {/* Header bar */}
+                <div className="game-screen">
+                    {/* Header */}
                     <div className="game-header">
-                        <span className="game-room-code">🎯 Solo</span>
-                        <span className="game-question-num">Q{questionNumber}{totalQuestionsPerRound ? `/${totalQuestionsPerRound}` : ''}</span>
+                        <button className="btn-close-game" onClick={() => navigate("/")}>✕</button>
+                        <div className={`timer-ring expired`}>00</div>
+                        <div style={{ width: 34 }} />
                     </div>
 
-                    {/* Result banner */}
-                    <div className={`answer-banner ${spAnswerResult.isCorrect ? 'answer-banner-correct' : 'answer-banner-incorrect'}`}>
-                        <span className="answer-banner-icon">
-                            {!selectedOption ? '⏰' : spAnswerResult.isCorrect ? '🎉' : '❌'}
-                        </span>
-                        <span className="answer-banner-text">
-                            {!selectedOption
-                                ? "Time's up!"
-                                : spAnswerResult.isCorrect
-                                    ? 'Correct!'
-                                    : 'Wrong!'}
+                    {/* Result Icon + Text */}
+                    <div className="feedback-icon-container">
+                        <div className={`circle-result ${isTimeout ? "circle-timeout" : isCorrect ? "circle-correct" : "circle-wrong"}`}>
+                            {isTimeout ? "⏰" : isCorrect ? "✓" : "✗"}
+                        </div>
+                        <h2 className={`feedback-text ${isTimeout ? "timeout" : isCorrect ? "correct" : "wrong"}`}>
+                            {isTimeout ? "Time's Up!" : isCorrect ? "Correct!" : "Oops!"}
+                        </h2>
+                        <div className={`points-badge ${isCorrect ? "earned" : "zero"}`}>
+                            {isCorrect ? `+${spLastPointsEarned} points` : "+0 points"}
+                        </div>
+                    </div>
+
+                    {/* Question recap */}
+                    <div className="question-recap">
+                        {question?.question}
+                        <br />
+                        <span className={`recap-answer-chip ${isCorrect ? "correct" : "wrong"}`}>
+                            {spAnswerResult.correctAnswer}
                         </span>
                     </div>
 
-                    {/* Answer details */}
-                    <div className="round-scoreboard">
-                        {!spAnswerResult.isCorrect && (
-                            <div className="answer-summary-row">
-                                <span className="answer-summary-label">Correct answer</span>
-                                <span className="answer-summary-value text-correct">
-                                    {spAnswerResult.correctAnswer}
-                                </span>
+                    {/* Show options with correct/wrong highlighted on wrong answer */}
+                    {!isCorrect && question?.options && (
+                        <div className="feedback-options-list">
+                            {question.options.map((opt, i) => {
+                                let cls = "option-button";
+                                if (opt === spAnswerResult.correctAnswer) cls += " correct";
+                                else if (opt === selectedOption) cls += " wrong";
+                                else cls += " dimmed";
+                                return (
+                                    <button key={i} className={cls} disabled>{opt}</button>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    {/* Round Progress Card */}
+                    <div className="round-progress-card">
+                        <div className="scoreboard-header-text">Round Progress</div>
+                        <div className="progress-detail-row">
+                            <span>Current Score</span>
+                            <span className="value-primary">{spScore} pts</span>
+                        </div>
+                        <div className="progress-detail-row">
+                            <span>Questions Completed</span>
+                            <span>{questionNumber} / {totalQuestionsPerRound || "?"}</span>
+                        </div>
+                        <div className="progress-bar-container">
+                            <div className="progress-bar-fill" style={{ width: `${progressPct}%` }} />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // ── MP Scoreboard Screen (Screen 6) ──
+    if (showScoreboard) {
+        const isTimeout = !selectedOption;
+
+        return (
+            <div className="page">
+                <div className="game-screen">
+                    {/* Header */}
+                    <div className="game-header">
+                        <button className="btn-close-game" onClick={() => navigate("/")}>✕</button>
+                        <div className="timer-ring expired">00</div>
+                        <div style={{ width: 34 }} />
+                    </div>
+
+                    {/* Result Icon */}
+                    <div className="feedback-icon-container">
+                        <div className={`circle-result ${isTimeout ? "circle-timeout" : playerIsCorrect ? "circle-correct" : "circle-wrong"}`}>
+                            {isTimeout ? "⏰" : playerIsCorrect ? "✓" : "✗"}
+                        </div>
+                        <h2 className={`feedback-text ${isTimeout ? "timeout" : playerIsCorrect ? "correct" : "wrong"}`}>
+                            {isTimeout ? "Time's Up!" : playerIsCorrect ? "Correct!" : "Oops!"}
+                        </h2>
+                        {pointsEarned !== null && (
+                            <div className={`points-badge ${pointsEarned > 0 ? "earned" : "zero"}`}>
+                                {pointsEarned > 0 ? `+${pointsEarned} points` : "+0 points"}
                             </div>
                         )}
-                        <div className="answer-summary-row">
-                            <span className="answer-summary-label">Your score</span>
-                            <span className="answer-summary-value text-correct">
-                                {spScore} pts
-                            </span>
-                        </div>
-                        <div className="answer-summary-row">
-                            <span className="answer-summary-label">Accuracy</span>
-                            <span className="answer-summary-value">
-                                {questionNumber > 0 ? Math.round((spCorrectCount / questionNumber) * 100) : 0}%
-                            </span>
-                        </div>
                     </div>
 
-                    {/* Auto-advance indicator */}
-                    <div className="next-question-countdown">
-                        <span className="countdown-label">Next question loading…</span>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    // ───────── MP Scoreboard Screen ─────────
-    if (showScoreboard) {
-        return (
-            <div className="page">
-                <div className="card glass game-card">
-                    {/* Header bar */}
-                    <div className="game-header">
-                        <span className="game-room-code">{roomCode}</span>
-                        <span className="game-question-num">Q{questionNumber}</span>
+                    {/* Question recap */}
+                    <div className="question-recap">
+                        {question?.question}
+                        <br />
+                        <span className="recap-answer-chip correct">{correctAnswer}</span>
                     </div>
 
-                    {/* Result banner */}
-                    <div className={`answer-banner ${playerIsCorrect ? 'answer-banner-correct' : 'answer-banner-incorrect'}`}>
-                        <span className="answer-banner-icon">
-                            {!selectedOption ? '⏰' : playerIsCorrect ? '🎉' : '❌'}
-                        </span>
-                        <span className="answer-banner-text">
-                            {!selectedOption
-                                ? "Time's up!"
-                                : playerIsCorrect
-                                    ? `Correct!`
-                                    : 'Wrong!'}
-                        </span>
-                    </div>
-
-                    {/* Scoreboard */}
-                    <div className="round-scoreboard">
-                        <h3 className="round-scoreboard-title">📊 Scoreboard</h3>
-                        <div className="leaderboard">
+                    {/* Live Scoreboard */}
+                    <div className="scoreboard-card">
+                        <div className="scoreboard-header-text">Live Scoreboard</div>
+                        <div className="scoreboard-list">
                             {leaderboard.map((player, index) => {
                                 const isYou = player.username === username;
-                                const medal = MEDAL[index] ?? null;
                                 return (
-                                    <div
-                                        key={player.username}
-                                        className={`leaderboard-row${index === 0 ? " leaderboard-row-winner" : ""}${isYou ? " leaderboard-row-you" : ""}`}
-                                        style={{ animationDelay: `${index * 0.08}s` }}
-                                    >
-                                        <span className="leaderboard-rank">
-                                            {medal ?? `#${index + 1}`}
-                                        </span>
-                                        <span className="leaderboard-name">
-                                            {player.username}
-                                            {isYou && <span className="leaderboard-you-tag"> (you)</span>}
-                                        </span>
-                                        <span className="leaderboard-score">
-                                            {player.score} pts
-                                        </span>
+                                    <div key={player.username} className={`scoreboard-row ${isYou ? "highlighted" : ""}`}>
+                                        <div className="scoreboard-player-name">
+                                            {MEDAL[index] ?? `#${index + 1}`} {player.username}
+                                            {isYou && <span style={{ fontSize: "0.75rem", color: "var(--color-primary)" }}> (YOU)</span>}
+                                        </div>
+                                        <div className="scoreboard-player-pts">{player.score} pts</div>
                                     </div>
                                 );
                             })}
                         </div>
-                        {pointsEarned !== null && (
-                            <div className="answer-summary-row">
-                                <span className="answer-summary-label">Points earned</span>
-                                <span className={`answer-summary-value ${pointsEarned > 0 ? 'text-correct' : 'text-incorrect'}`}>
-                                    {pointsEarned > 0 ? `+${pointsEarned} pts` : '+0 pts'}
-                                </span>
-                            </div>
-                        )}
                     </div>
 
-                    {/* Next question countdown */}
+                    {/* Countdown to next */}
                     <div className="next-question-countdown">
                         <div className="countdown-ring">
                             <svg viewBox="0 0 40 40" className="countdown-svg">
-                                <circle
-                                    cx="20" cy="20" r="17"
-                                    className="countdown-track"
-                                />
+                                <circle cx="20" cy="20" r="17" className="countdown-track" />
                                 <circle
                                     cx="20" cy="20" r="17"
                                     className="countdown-fill"
@@ -532,128 +466,132 @@ export default function GamePage() {
         );
     }
 
-    // ───────── Question Screen ─────────
+    // ── Question Screen (Screen 5) ──
+    const timerDanger = timeLeft <= 5 && !timerExpired;
+
     return (
         <div className="page">
-            <div className="card glass game-card">
-                {/* Header bar */}
-                <div className="game-header">
-                    <span className="game-room-code">{isSinglePlayer ? '🎯 Solo' : roomCode}</span>
-                    <span className="game-question-num">Q{questionNumber}{isSinglePlayer && totalQuestionsPerRound ? `/${totalQuestionsPerRound}` : ''}</span>
-                </div>
-
-                {/* Timer progress bar */}
-                <div className="timer-container">
-                    <div className="timer-bar-bg">
-                        <div
-                            className={`timer-bar-fill${timeLeft <= 5 ? ' timer-danger' : ''}`}
-                            style={{ width: `${(timeLeft / roundTime) * 100}%` }}
-                        />
+            <div className="game-screen">
+                {/* ── Question Panel (top 35%) ── */}
+                <div className="question-panel">
+                    {/* Header: close btn | timer ring | spacer */}
+                    <div className="game-header">
+                        <button className="btn-close-game" onClick={() => navigate("/")} id="btn-close-game">✕</button>
+                        <div className={`timer-ring ${timerDanger ? "danger" : ""} ${timerExpired ? "expired" : ""}`}>
+                            {timerExpired ? "00" : String(timeLeft).padStart(2, "0")}
+                        </div>
+                        <div style={{ width: 34 }} />
                     </div>
-                    <span className={`timer-text${timeLeft <= 5 ? ' timer-text-danger' : ''}`}>
-                        {timerExpired ? '⏰ Time\'s up!' : `${timeLeft}s`}
-                    </span>
-                </div>
 
-                {/* Question */}
-                <h2 className={`game-question${questionType === "emoji" ? " game-question-emoji" : ""}`}>
-                    {question.question}
-                </h2>
+                    {/* Image question */}
+                    {questionType === "image" && question.imageUrl && (
+                        <div className="question-image-box">
+                            {!imageLoaded && <span className="question-image-loading">Loading image…</span>}
+                            <img
+                                src={question.imageUrl}
+                                alt="Question"
+                                style={!imageLoaded ? { display: "none" } : {}}
+                                onLoad={() => setImageLoaded(true)}
+                            />
+                        </div>
+                    )}
 
-                {/* Conditional media block based on questionType */}
-                {questionType === "image" && question.imageUrl && (
-                    <div className="question-image-container">
-                        {!imageLoaded && <span className="question-image-loading">Loading image…</span>}
-                        <img
-                            src={question.imageUrl}
-                            alt="Question"
-                            className="question-image"
-                            style={!imageLoaded ? { display: 'none' } : {}}
-                            onLoad={() => setImageLoaded(true)}
-                        />
-                    </div>
-                )}
-
-                {questionType === "emoji" && (
-                    <div className="question-emoji">
-                        {(question.question.match(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu) || []).join(' ')}
-                    </div>
-                )}
-
-                {questionType === "audio" && question.audioUrl && (
-                    <div className="question-audio-controls">
-                        <button
-                            className={`audio-play-btn${isAudioPlaying ? " audio-playing" : ""}`}
-                            onClick={handleAudioReplay}
-                            type="button"
-                        >
-                            <span className="audio-icon">{isAudioPlaying ? "⏸" : "▶️"}</span>
-                            {isAudioPlaying ? "Playing…" : "Play Audio"}
-                        </button>
-                    </div>
-                )}
-
-                {/* Answer area */}
-                {answerType === "options" && question.options && question.options.length > 0 ? (
-                    <div className="game-options">
-                        {question.options.map((option, i) => (
+                    {/* Audio controls */}
+                    {questionType === "audio" && question.audioUrl && (
+                        <div className="question-audio-controls">
                             <button
-                                key={i}
-                                className={getOptionClass(option)}
-                                onClick={() => handleOptionClick(option)}
-                                disabled={!!selectedOption || timerExpired}
+                                className={`audio-play-btn${isAudioPlaying ? " audio-playing" : ""}`}
+                                onClick={handleAudioReplay}
+                                type="button"
+                                id="btn-audio-play"
                             >
-                                <span className="option-letter">
-                                    {String.fromCharCode(65 + i)}
-                                </span>
-                                <span className="option-text">{option}</span>
+                                <span>{isAudioPlaying ? "⏸" : "▶️"}</span>
+                                {isAudioPlaying ? "Playing…" : "Play Audio"}
                             </button>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="text-answer-container">
-                        <input
-                            type="text"
-                            className="text-answer-input"
-                            placeholder="Type your answer…"
-                            value={textAnswer}
-                            onChange={(e) => setTextAnswer(e.target.value)}
-                            onKeyDown={handleTextKeyDown}
-                            disabled={!!selectedOption || timerExpired}
-                            autoFocus
-                        />
-                        <button
-                            className="text-answer-submit"
-                            onClick={handleTextSubmit}
-                            disabled={!!selectedOption || timerExpired || !textAnswer.trim()}
-                        >
-                            Submit
-                        </button>
-                    </div>
-                )}
+                        </div>
+                    )}
 
-                {/* Waiting indicator after answering, before round end */}
-                {(selectedOption || timerExpired) && !isSinglePlayer && (
-                    <div className="game-waiting-result">
-                        <div className="waiting-dots">
-                            <span className="dot"></span>
-                            <span className="dot"></span>
-                            <span className="dot"></span>
-                        </div>
-                        <p className="hint-text">Waiting for other players…</p>
+                    {/* Question counter + text */}
+                    <div className="question-counter">
+                        Question {questionNumber}{isSinglePlayer && totalQuestionsPerRound ? ` of ${totalQuestionsPerRound}` : ""}
                     </div>
-                )}
-                {/* SP: Show brief submitting indicator */}
-                {(selectedOption || timerExpired) && isSinglePlayer && spSubmitting && (
-                    <div className="game-waiting-result">
-                        <div className="waiting-dots">
-                            <span className="dot"></span>
-                            <span className="dot"></span>
-                            <span className="dot"></span>
+                    <h3 className={`question-text${questionType === "emoji" ? " emoji-type" : ""}`}>
+                        {question.question}
+                    </h3>
+
+                    {/* Emoji display */}
+                    {questionType === "emoji" && (
+                        <div className="question-emoji-display">
+                            {(question.question.match(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu) || []).join(" ")}
                         </div>
-                        <p className="hint-text">Checking your answer…</p>
-                    </div>
-                )}
+                    )}
+                </div>
+
+                {/* ── Answer Panel (bottom 65%) ── */}
+                <div className="answer-panel">
+                    {answerType === "options" && question.options?.length > 0 ? (
+                        <div className="options-list">
+                            {question.options.map((option, i) => {
+                                let cls = "option-button";
+                                if (selectedOption === option) cls += " selected";
+                                else if ((selectedOption || timerExpired) && option !== selectedOption) cls += " dimmed";
+                                return (
+                                    <button
+                                        key={i}
+                                        id={`option-${i}`}
+                                        className={cls}
+                                        onClick={() => handleOptionClick(option)}
+                                        disabled={!!selectedOption || timerExpired}
+                                    >
+                                        {option}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="text-answer-container">
+                            <input
+                                type="text"
+                                className="text-answer-input"
+                                placeholder="Type your answer…"
+                                value={textAnswer}
+                                onChange={(e) => setTextAnswer(e.target.value)}
+                                onKeyDown={(e) => e.key === "Enter" && handleTextSubmit()}
+                                disabled={!!selectedOption || timerExpired}
+                                autoFocus
+                                id="text-answer-input"
+                            />
+                            <button
+                                className="btn-primary"
+                                onClick={handleTextSubmit}
+                                disabled={!!selectedOption || timerExpired || !textAnswer.trim()}
+                                id="btn-text-submit"
+                            >
+                                Submit
+                            </button>
+                        </div>
+                    )}
+
+                    {/* MP: Waiting for other players */}
+                    {(selectedOption || timerExpired) && !isSinglePlayer && (
+                        <div className="game-waiting-indicator">
+                            <div className="waiting-dots">
+                                <span className="dot" /><span className="dot" /><span className="dot" />
+                            </div>
+                            <p>Waiting for other players…</p>
+                        </div>
+                    )}
+
+                    {/* SP: Checking answer */}
+                    {(selectedOption || timerExpired) && isSinglePlayer && spSubmitting && (
+                        <div className="game-waiting-indicator">
+                            <div className="waiting-dots">
+                                <span className="dot" /><span className="dot" /><span className="dot" />
+                            </div>
+                            <p>Checking your answer…</p>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

@@ -2,171 +2,259 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useJest } from "../context/JestContext";
 import socket from "../socketConnection";
-import { buySubscription, checkSubscription, getPlayerSigned } from "../services/jestService";
+import { buySubscription, getPlayerSigned, getPlayerData } from "../services/jestService";
 import API from "../services/apiEndpoints";
 import axios from "axios";
+let startGameData = require("../dummyData/startGame.json")
 
 export default function Home() {
   const navigate = useNavigate();
   const { savedProfile, subscriptions, setSubscriptions } = useJest();
-  console.log("SAVE PROFILE : " + JSON.stringify(savedProfile))
-  const username = savedProfile?.username || "";
-  console.log("USERNAME @Home.js: " + username)
+  const username = savedProfile?.username || "Player";
   const activeSubscriptionSku = "MULTI_TRIVIA_PLUS";
   const premiumPlan = subscriptions?.find(sub => sub.sku === activeSubscriptionSku);
   const isPremiumSubscriber = premiumPlan?.status === "active";
+  // const lastScore = 10;
 
-  const [showMultiOptions, setShowMultiOptions] = useState(false);
+  // Multiplayer sub-view: null | "options" | "join-expanded"
+  const [mpView, setMpView] = useState(null);
+  const [joinCode, setJoinCode] = useState("");
+  const [joinError, setJoinError] = useState(null);
+  const [joining, setJoining] = useState(false);
+
+  // Pull stats from Jest data store (best-effort)
+  const gamesPlayed = getPlayerData("gamesPlayed") || 0;
+  const lastScore = getPlayerData("lastScore") || 10;
 
   const connectAndGo = (path) => {
-    if (!username) return;
     if (!socket.connected) socket.connect();
     navigate(path, { state: { username } });
   };
 
   const handleBuySubscription = async () => {
     try {
-      // Use your specific SKU here
       const result = await buySubscription(activeSubscriptionSku);
-      console.log("SUBSCRIPTION RESULT : " + JSON.stringify(result))
-
       if (result.result === "success") {
-        console.log("Subscription purchased successfully!", result.subscription);
-        // Get the signed player token to prove identity to the backend
         const signedData = await getPlayerSigned();
-        let subscriptionDetails = result.subscription.status == "active" ? [result.subscription] : []
-        setSubscriptions(subscriptionDetails)
-
-        // Call backend API to update subscription in DB
+        const subscriptionDetails = result.subscription.status === "active" ? [result.subscription] : [];
+        setSubscriptions(subscriptionDetails);
         await axios.post(API.USER.UPDATE_SUBSCRIPTION, {
           subscriptionDetails: result.subscription,
           playerData: signedData.player
-        }, {
-          headers: { Authorization: signedData.playerSigned }
-        });
-
-        // alert("Subscription successfully purchased and synced to backend!");
-      } else if (result.result === "cancel") {
-        console.log("Subscription cancelled by user");
-      } else {
-        console.error("Subscription error", result.error);
-        // alert("Error buying subscription: " + result.error);
+        }, { headers: { Authorization: signedData.playerSigned } });
       }
     } catch (e) {
       console.error("Failed to buy subscription", e);
-      // alert("Failed to initiate subscription");
     }
   };
 
   const handlerSinglePlayer = async () => {
     try {
-      const signedData = await getPlayerSigned()
+      const signedData = await getPlayerSigned();
       let response = await axios.post(API.GAME.START_GAME, {
         playerData: signedData.player
-      }, {
-        headers: { Authorization: signedData.playerSigned }
-      })
-
-      console.log("game/start-game RESPONSE : " + JSON.stringify(response))
-      const { toShowInstructionScreen, instructionScreenData, questionScreenData } = response.data.data
-      console.log(toShowInstructionScreen)
-      console.log(instructionScreenData)
-      console.log(questionScreenData)
-
-      // Extract totalQuestionsPerRound from the question data if available
-      const totalQuestionsPerRound = response.data.data.totalQuestionsPerRound
+      }, { headers: { Authorization: signedData.playerSigned } });
+      // let response = startGameData
+      console.log("START GAME RESPONSE : " + JSON.stringify(response))
+      const { toShowInstructionScreen, instructionScreenData, questionScreenData } = response.data.data;
+      const totalQuestionsPerRound = response.data.data.totalQuestionsPerRound;
 
       if (toShowInstructionScreen) {
         navigate("/instructions", {
           state: { instructionScreenData, questionScreenData, username, totalQuestionsPerRound }
-        })
+        });
       } else {
         navigate("/game", {
           state: { currentQuestion: questionScreenData.question, username, mode: "single-player", totalQuestionsPerRound }
-        })
+        });
       }
     } catch (err) {
-      console.error("Error starting single-player game:", err)
-      // alert(err?.response?.data?.error || "Failed to start game. Please try again.")
+      console.error("Error starting single-player game:", err);
     }
+  };
+
+  const handleJoinSubmit = () => {
+    if (!joinCode.trim()) return;
+    setJoinError(null);
+    setJoining(true);
+
+    if (!socket.connected) socket.connect();
+
+    const doJoin = async () => {
+      const signedData = await getPlayerSigned();
+      socket.emit("room:join", {
+        username,
+        roomCode: joinCode.trim().toUpperCase(),
+        playerSigned: signedData.playerSigned,
+        playerData: signedData.player
+      });
+    };
+
+    const onRoomJoined = (data) => {
+      socket.off("room:joined", onRoomJoined);
+      socket.off("error", onJoinError);
+      navigate("/waiting", { state: { username, roomCode: data.roomCode, players: data.players } });
+    };
+
+    const onJoinError = (data) => {
+      socket.off("room:joined", onRoomJoined);
+      socket.off("error", onJoinError);
+      setJoinError(data.message);
+      setJoining(false);
+    };
+
+    socket.on("room:joined", onRoomJoined);
+    socket.on("error", onJoinError);
+
+    if (socket.connected) {
+      doJoin();
+    } else {
+      socket.once("connect", doJoin);
+    }
+  };
+
+  // ── Mode Selection (default view) ──
+  if (!mpView) {
+    return (
+      <div className="page">
+        <div className="screen-container">
+          {/* Header */}
+          <div className="home-header">
+            <div className="user-greeting">Hello, {username}! 👋</div>
+            {/* {lastScore > 0 && (
+              <div className="score-badge">🏆 {lastScore}</div>
+            )} */}
+          </div>
+
+          <h2 className="home-title">What would you<br />like to do?</h2>
+
+          {/* Mode Cards */}
+          <div className="home-mode-grid">
+            <div className="mode-card" onClick={handlerSinglePlayer} id="btn-single-player">
+              <div className="mode-icon">🧠</div>
+              <div>
+                <div className="mode-name">Single Player</div>
+                <div className="mode-sub">7 Questions</div>
+              </div>
+            </div>
+
+            <div className="mode-card" onClick={() => setMpView("options")} id="btn-multiplayer">
+              <div className="mode-icon">🎮</div>
+              <div>
+                <div className="mode-name">Multiplayer</div>
+                <div className="mode-sub">Play with Friends</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats Section */}
+          <div className="stats-section">
+            <div className="section-title">Your Statistics</div>
+            <div className="stats-grid">
+              <div className="stat-card">
+                <div className="stat-value">{gamesPlayed}</div>
+                <div className="stat-label">Games Played</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-value">{lastScore > 0 ? `${lastScore}` : "—"}</div>
+                <div className="stat-label">Last Score</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-value">{isPremiumSubscriber ? "✓" : "—"}</div>
+                <div className="stat-label">Premium</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-value">🔥</div>
+                <div className="stat-label">Daily Mode</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Premium button */}
+          {!isPremiumSubscriber && (
+            <div className="home-premium-section">
+              <button className="btn-premium" onClick={handleBuySubscription} id="btn-buy-premium">
+                <span>💎</span> Buy Premium Plan
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
   }
 
+  // ── Multiplayer Options View ──
   return (
     <div className="page">
-      <div className="card glass">
-        <div className="logo-icon">🧠</div>
-        <h1 className="title">Multi Trivia</h1>
-        <p className="subtitle">
-          Welcome, <strong>{username}</strong> 👋
-        </p>
-        <p className="subtitle" style={{ marginTop: 0, opacity: 0.7, fontSize: "0.9rem" }}>
-          Choose your game mode
-        </p>
+      <div className="screen-container">
+        {/* Header */}
+        <div className="screen-header">
+          <button className="btn-back" onClick={() => { setMpView(null); setJoinCode(""); setJoinError(null); }}>←</button>
+          <span className="screen-title">Multiplayer</span>
+          <div style={{ width: 36 }} />
+        </div>
 
-        {!showMultiOptions ? (
-          /* ── Mode Selection ── */
-          <div className="btn-group">
-            {/* Single Player */}
-            <button
-              className="btn btn-primary"
-              onClick={handlerSinglePlayer}
-            >
-              <span className="btn-icon">🎯</span>
-              Single Player
-            </button>
-
-            {/* Multiplayer */}
-            <button
-              className="btn btn-secondary"
-              onClick={() => setShowMultiOptions(true)}
-            >
-              <span className="btn-icon">🌐</span>
-              Multiplayer
-            </button>
-
-            {/* Buy Subscription */}
-            {!isPremiumSubscriber && (
-              <button
-                className="btn btn-ghost"
-                onClick={handleBuySubscription}
-                style={{ marginTop: "1rem" }}
-              >
-                <span className="btn-icon">💎</span>
-                Buy Premium Plan
-              </button>
-            )}
-          </div>
-        ) : (
-          /* ── Multiplayer Sub-options ── */
-          <div className="btn-group">
-            <p className="subtitle" style={{ marginBottom: "0.5rem", opacity: 0.8 }}>
-              🌐 Multiplayer
-            </p>
-
-            <button
-              className="btn btn-primary"
-              onClick={() => connectAndGo("/create")}
-            >
-              <span className="btn-icon">🎮</span>
+        <div className="mp-options-section">
+          {/* Create Room Card */}
+          <div className="mp-card" id="card-create-room">
+            <div className="mp-card-header">
+              <div className="mp-card-icon create">➕</div>
+              <div className="mp-card-title">Create Room</div>
+            </div>
+            <p className="mp-card-desc">Start a new game lobby, choose topics (Premium), and invite friends to compete.</p>
+            <button className="btn-primary" onClick={() => connectAndGo("/create")} id="btn-create-room">
               Create Room
             </button>
-
-            <button
-              className="btn btn-secondary"
-              onClick={() => connectAndGo("/join")}
-            >
-              <span className="btn-icon">🚪</span>
-              Join Room
-            </button>
-
-            <button
-              className="btn btn-ghost"
-              onClick={() => setShowMultiOptions(false)}
-              style={{ marginTop: "0.25rem" }}
-            >
-              ← Back
-            </button>
           </div>
+
+          {/* Join Room Card */}
+          <div className="mp-card" id="card-join-room">
+            <div className="mp-card-header">
+              <div className="mp-card-icon join">🚪</div>
+              <div className="mp-card-title">Join Room</div>
+            </div>
+            <p className="mp-card-desc">Enter an active 6-digit room code shared by your friend to join their lobby.</p>
+
+            {mpView !== "join-expanded" ? (
+              <button
+                className="btn-primary btn-green"
+                onClick={() => setMpView("join-expanded")}
+                id="btn-show-join-input"
+              >
+                Join Room
+              </button>
+            ) : (
+              <div className="join-expandable" id="join-code-section">
+                {joinError && <p className="error-msg">{joinError}</p>}
+                <input
+                  type="text"
+                  className="input-code"
+                  placeholder="ENTER CODE"
+                  maxLength={6}
+                  value={joinCode}
+                  onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                  onKeyDown={(e) => e.key === "Enter" && handleJoinSubmit()}
+                  autoFocus
+                  id="join-code-input"
+                />
+                <button
+                  className="btn-primary btn-green"
+                  style={{ width: "100%" }}
+                  onClick={handleJoinSubmit}
+                  disabled={!joinCode.trim() || joining}
+                  id="btn-join-lobby"
+                >
+                  {joining ? "Joining…" : "Join Lobby"}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {!isPremiumSubscriber && (
+          <p className="mp-limit-text">
+            Free tier: 3 lifetime rooms total. <strong onClick={handleBuySubscription}>Go Premium</strong> for unlimited access.
+          </p>
         )}
       </div>
     </div>

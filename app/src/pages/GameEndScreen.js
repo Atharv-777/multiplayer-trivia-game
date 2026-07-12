@@ -3,157 +3,160 @@ import { useNavigate } from "react-router-dom";
 import { getPlayerData, setPlayerData, flushPlayerData } from "../services/jestService";
 
 const MEDAL = ["🥇", "🥈", "🥉"];
+const AVATAR_COLORS = ["#7B2FBF", "#26890C", "#FFA500", "#E21B3C", "#1565C0"];
 
 export default function GameEndScreen({ leaderboard = [], username, mode, score, correctCount, totalQuestions }) {
     const navigate = useNavigate();
     const isSinglePlayer = mode === "single-player";
-    // sessionStorage is per-tab — set at login, never confused across players
-    const myUsername = sessionStorage.getItem('myUsername') || username;
+    const myUsername = sessionStorage.getItem("myUsername") || username;
 
-    // Persist this game's result to the Jest data store once, on mount
+    // Persist result to Jest data store on mount
     useEffect(() => {
         if (isSinglePlayer) {
-            // SP: persist score from props
             const gamesPlayed = (getPlayerData("gamesPlayed") || 0) + 1;
             setPlayerData({ lastScore: score, gamesPlayed });
-            flushPlayerData().catch(() => { });
-            console.log(`[GameEndScreen] SP — Persisted to Jest — lastScore: ${score}, gamesPlayed: ${gamesPlayed}`);
+            flushPlayerData().catch(() => {});
         } else {
-            // MP: persist from leaderboard
             const myEntry = leaderboard.find((p) => p.username === myUsername);
             if (!myEntry) return;
-
-            const lastScore = myEntry.score;
             const gamesPlayed = (getPlayerData("gamesPlayed") || 0) + 1;
-
-            setPlayerData({ lastScore, gamesPlayed });
-            flushPlayerData().catch(() => { });
-
-            console.log(`[GameEndScreen] MP — Persisted to Jest — lastScore: ${lastScore}, gamesPlayed: ${gamesPlayed}`);
+            setPlayerData({ lastScore: myEntry.score, gamesPlayed });
+            flushPlayerData().catch(() => {});
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // ───────── Single-Player Results ─────────
+    // ── Single-Player Results (Screen 9) ──
     if (isSinglePlayer) {
         const accuracy = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
+        const progressPct = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
+
+        const motivational =
+            accuracy >= 80
+                ? "🌟 Outstanding performance!"
+                : accuracy >= 50
+                    ? "👏 Good job! Keep practicing!"
+                    : "💪 Keep going! You'll do better next time!";
+
+        const accuracyClass =
+            accuracy >= 70 ? "detail-value-green" : accuracy >= 40 ? "" : "detail-value-red";
 
         return (
             <div className="page">
-                <div className="card glass game-card">
-                    {/* Trophy header */}
-                    <div className="game-end-header">
-                        <span className="game-end-trophy">🏆</span>
-                        <h1 className="game-end-title">Round Complete!</h1>
-                        <p className="game-end-subtitle">Here's how you did</p>
+                <div className="screen-container">
+                    {/* Header */}
+                    <div className="screen-header">
+                        <div style={{ width: 36 }} />
+                        <span className="screen-title">Round End</span>
+                        <div style={{ width: 36 }} />
                     </div>
 
-                    {/* Score summary */}
-                    <div className="round-scoreboard">
-                        <div className="answer-summary-row">
-                            <span className="answer-summary-label">Score</span>
-                            <span className="answer-summary-value text-correct">
-                                {score} pts
-                            </span>
+                    <div className="results-content">
+                        {/* Trophy badge */}
+                        <span className="results-badge-emoji">🎯</span>
+                        <h2 className="results-title">Round Complete!</h2>
+
+                        {/* Stats card */}
+                        <div className="results-stats-card">
+                            <div className="results-score-value">{score} pts</div>
+                            <div className="results-score-label">Your Final Score</div>
+
+                            <div className="results-details">
+                                <div className="detail-row">
+                                    <span>Questions Answered</span>
+                                    <span>{totalQuestions} / {totalQuestions}</span>
+                                </div>
+                                <div className="detail-row">
+                                    <span>Correct Answers</span>
+                                    <span>{correctCount}</span>
+                                </div>
+                                <div className="progress-bar-container">
+                                    <div className="progress-bar-fill" style={{ width: `${progressPct}%` }} />
+                                </div>
+                                <div className="detail-row" style={{ marginTop: 4 }}>
+                                    <span>Accuracy</span>
+                                    <span className={accuracyClass}>{accuracy}%</span>
+                                </div>
+                            </div>
                         </div>
-                        <div className="answer-summary-row">
-                            <span className="answer-summary-label">Correct</span>
-                            <span className="answer-summary-value">
-                                {correctCount} / {totalQuestions}
-                            </span>
-                        </div>
-                        <div className="answer-summary-row">
-                            <span className="answer-summary-label">Accuracy</span>
-                            <span className={`answer-summary-value ${accuracy >= 70 ? 'text-correct' : accuracy >= 40 ? '' : 'text-incorrect'}`}>
-                                {accuracy}%
-                            </span>
+
+                        {/* Motivational */}
+                        <p className="results-motivational">{motivational}</p>
+
+                        {/* Buttons */}
+                        <div className="results-buttons">
+                            <button className="btn-primary" onClick={() => navigate("/")} id="btn-play-again">
+                                <span className="btn-icon">🔄</span> Play Again
+                            </button>
+                            <button className="btn-secondary-outline" onClick={() => navigate("/")} id="btn-go-home">
+                                Home
+                            </button>
                         </div>
                     </div>
-
-                    {/* Encouragement */}
-                    <div className="game-end-winner-callout">
-                        {accuracy >= 80
-                            ? "🌟 Outstanding performance!"
-                            : accuracy >= 50
-                                ? "👏 Good job! Keep practicing!"
-                                : "💪 Keep going! You'll do better next time!"}
-                    </div>
-
-                    {/* Play Again */}
-                    <button
-                        className="btn btn-primary"
-                        onClick={() => navigate("/")}
-                        style={{ width: "100%", marginTop: "16px" }}
-                    >
-                        <span className="btn-icon">🏠</span>
-                        Play Again
-                    </button>
                 </div>
             </div>
         );
     }
 
-    // ───────── Multiplayer Leaderboard ─────────
+    // ── Multiplayer Final Leaderboard ──
     return (
         <div className="page">
-            <div className="card glass game-card">
-                {/* Trophy header */}
-                <div className="game-end-header">
-                    <span className="game-end-trophy">🏆</span>
-                    <h1 className="game-end-title">Game Over!</h1>
-                    <p className="game-end-subtitle">Final Leaderboard</p>
+            <div className="screen-container">
+                {/* Header */}
+                <div className="mp-end-header">
+                    <span className="mp-end-trophy">🏆</span>
+                    <h1 className="mp-end-title">Game Over!</h1>
+                    <p className="mp-end-subtitle">Final Leaderboard</p>
                 </div>
 
-                {/* Leaderboard list */}
-                <div className="leaderboard">
+                {/* Leaderboard */}
+                <div className="mp-leaderboard-card">
                     {leaderboard.map((player, index) => {
                         const isYou = player.username === myUsername;
-                        const medal = MEDAL[index] ?? null;
-
                         return (
                             <div
                                 key={player.socketId || index}
-                                className={`leaderboard-row${index === 0 ? " leaderboard-row-winner" : ""}${isYou ? " leaderboard-row-you" : ""}`}
+                                className={`leaderboard-row${isYou ? " you" : ""}`}
+                                style={{ animationDelay: `${index * 0.06}s` }}
                             >
-                                {/* Rank */}
                                 <span className="leaderboard-rank">
-                                    {medal ?? `#${index + 1}`}
+                                    {MEDAL[index] ?? `#${index + 1}`}
                                 </span>
-
-                                {/* Name */}
+                                <div
+                                    className="player-avatar"
+                                    style={{
+                                        background: AVATAR_COLORS[index % AVATAR_COLORS.length],
+                                        width: 28,
+                                        height: 28,
+                                        fontSize: "0.75rem",
+                                        flexShrink: 0
+                                    }}
+                                >
+                                    {player.username.charAt(0).toUpperCase()}
+                                </div>
                                 <span className="leaderboard-name">
                                     {player.username}
                                     {isYou && <span className="leaderboard-you-tag"> (you)</span>}
                                 </span>
-
-                                {/* Score */}
-                                <span className="leaderboard-score">
-                                    {player.score} pts
-                                </span>
+                                <span className="leaderboard-score">{player.score} pts</span>
                             </div>
                         );
                     })}
                 </div>
 
                 {/* Winner callout */}
-                {
-                    leaderboard.length > 0 && (
-                        <div className="game-end-winner-callout">
-                            🎉 <strong>{
-                                leaderboard[0].username
-                            }</strong> wins!
-                        </div>
-                    )}
+                {leaderboard.length > 0 && (
+                    <div className="winner-callout">
+                        🎉 <strong>{leaderboard[0].username}</strong> wins!
+                    </div>
+                )}
 
                 {/* Home button */}
-                <button
-                    className="btn btn-primary"
-                    onClick={() => navigate("/")}
-                    style={{ width: "100%", marginTop: "16px" }}
-                >
-                    <span className="btn-icon">🏠</span>
-                    Home
-                </button>
+                <div className="mp-end-buttons">
+                    <button className="btn-primary" onClick={() => navigate("/")} id="btn-mp-home">
+                        <span className="btn-icon">🏠</span> Home
+                    </button>
+                </div>
             </div>
         </div>
     );

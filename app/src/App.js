@@ -24,7 +24,7 @@ function App() {
           <Route path="/game-end" element={<GameEndScreen />} />
         </Routes>
       </HashRouter>
-    </JestProvider>
+    // </JestProvider>
   );
 }
 

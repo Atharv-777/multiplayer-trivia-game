@@ -118,7 +118,7 @@ async function routeHandler(req, res) {
         if (!authResp.valid) return res.status(401).json({ valid: false, error: authResp.error })
         let playerData = authResp.playerData
         // Guard: check if handler exists for this route
-        let context = await getContext(playerData, "", "")
+        let context = await getContext(playerData)
         const handler = RouteMap[req.path]
         if (!handler) return res.status(404).json({ error: `Route not found: ${req.path}` })
 
@@ -126,7 +126,7 @@ async function routeHandler(req, res) {
         let userData = _.get(context, Constants.STRINGS.USER_DATA)
         console.log("USER DATA after handler : " + JSON.stringify(userData))
         await saveData(Constants.DB_TABLE.USER_DATA, userData)
-        return response
+        return res.status(response.status).json(response)
 
     } catch (err) {
         console.error("Error @routeHandler : ")

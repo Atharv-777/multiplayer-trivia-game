@@ -36,7 +36,7 @@ function authenticate(req) {
     }
 }
 
-async function getContext(playerData, type, roomId = "") {
+async function getContext(playerData) {
     console.log("getContext invoked")
     try {
         let context = {

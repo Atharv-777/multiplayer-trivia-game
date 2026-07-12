@@ -4,17 +4,26 @@ import "./SplashScreen.css";
 export default function SplashScreen() {
   return (
     <div className="splash">
-      {/* Background orbs */}
-      <div className="splash-orb splash-orb-1" />
-      <div className="splash-orb splash-orb-2" />
-      <div className="splash-orb splash-orb-3" />
+      {/* Soft background particles */}
+      <div className="splash-particle splash-particle-1" />
+      <div className="splash-particle splash-particle-2" />
 
       <div className="splash-content">
-        <div className="splash-logo">🧠</div>
-        <h1 className="splash-title">Multi Trivia</h1>
-        <p className="splash-tagline">Preparing your arena…</p>
+        {/* Floating emoji illustration */}
+        <div className="splash-illustration">
+          <span className="splash-globe">🌍</span>
+          <span className="splash-hat">🎓</span>
+          <span className="splash-coin">🪙</span>
+          <span className="splash-books">📚</span>
+          <span className="splash-star">⭐</span>
+        </div>
 
-        {/* Loading dots */}
+        {/* Branding */}
+        <p className="splash-welcome">Welcome to</p>
+        <span className="splash-title">Multi Trivia!</span>
+        <p className="splash-tagline">Play, Learn, and Explore with Exciting Quizzes!</p>
+
+        {/* Loading indicator */}
         <div className="splash-loader">
           <span className="splash-dot" />
           <span className="splash-dot" />
